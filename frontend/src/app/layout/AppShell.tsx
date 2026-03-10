@@ -1,14 +1,14 @@
 ﻿import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IconGlyph } from '../../components/ui/IconGlyph';
+import { Home, ArrowLeftRight, PieChart, BarChart3, Settings, Plus } from 'lucide-react';
 import { useUIStore } from '../../stores/uiStore';
 
 const navigation = [
-  { to: '/', label: 'Tổng quan', icon: 'home', end: true },
-  { to: '/transactions', label: 'Giao dịch', icon: 'list' },
-  { to: '/budgets', label: 'Ngân sách', icon: 'budget' },
-  { to: '/insights', label: 'Phân tích', icon: 'chart' },
-  { to: '/settings', label: 'Cài đặt', icon: 'settings' },
+  { to: '/', label: 'Tổng quan', icon: Home, end: true },
+  { to: '/transactions', label: 'Giao dịch', icon: ArrowLeftRight },
+  { to: '/budgets', label: 'Ngân sách', icon: PieChart },
+  { to: '/insights', label: 'Phân tích', icon: BarChart3 },
+  { to: '/settings', label: 'Cài đặt', icon: Settings },
 ] as const;
 
 export function AppShell() {
@@ -23,9 +23,9 @@ export function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
             <Outlet />
@@ -39,7 +39,7 @@ export function AppShell() {
         aria-label="Thêm giao dịch"
         whileTap={{ scale: 0.88 }}
       >
-        <IconGlyph name="plus" />
+        <Plus />
       </motion.button>
       <nav className="bottom-nav" aria-label="Điều hướng chính">
         {navigation.map((item) => (
@@ -49,7 +49,7 @@ export function AppShell() {
             end={item.to === '/'}
             className={({ isActive }) => `bottom-nav__item${isActive ? ' bottom-nav__item--active' : ''}`}
           >
-            <IconGlyph name={item.icon} size="sm" />
+            <item.icon size={18} />
             <span>{item.label}</span>
           </NavLink>
         ))}

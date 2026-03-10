@@ -1,6 +1,5 @@
 ﻿import type { PropsWithChildren, ReactNode } from 'react';
-import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
-import { IconGlyph } from './IconGlyph';
+import { Drawer } from 'vaul';
 
 interface ModalProps extends PropsWithChildren {
   open: boolean;
@@ -11,53 +10,18 @@ interface ModalProps extends PropsWithChildren {
 }
 
 export function Modal({ open, title, subtitle, onClose, children, footer }: ModalProps) {
-  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > 80 || info.velocity.y > 300) {
-      onClose();
-    }
-  };
-
   return (
-    <AnimatePresence>
-      {open ? (
-        <>
-          <motion.button
-            type="button"
-            className="modal-backdrop"
-            onClick={onClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-          <motion.aside
-            className="modal-sheet"
-            initial={{ opacity: 0, y: '100%' }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '100%' }}
-            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.6 }}
-            onDragEnd={handleDragEnd}
-            role="dialog"
-            aria-modal="true"
-            aria-label={title}
-          >
-            <header className="modal-header">
-              <div>
-                <h3>{title}</h3>
-                {subtitle ? <p>{subtitle}</p> : null}
-              </div>
-              <button type="button" className="icon-button icon-button--ghost" onClick={onClose} aria-label="Close dialog">
-                <IconGlyph name="close" size="sm" />
-              </button>
-            </header>
-            <div className="modal-body">{children}</div>
-            {footer ? <footer className="modal-footer">{footer}</footer> : null}
-          </motion.aside>
-        </>
-      ) : null}
-    </AnimatePresence>
+    <Drawer.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <Drawer.Portal>
+        <Drawer.Overlay className="drawer-overlay" />
+        <Drawer.Content className="drawer-content">
+          <div className="drawer-handle" />
+          <Drawer.Title className="drawer-title">{title}</Drawer.Title>
+          {subtitle ? <Drawer.Description className="drawer-description">{subtitle}</Drawer.Description> : null}
+          <div className="drawer-body">{children}</div>
+          {footer ? <div className="drawer-footer">{footer}</div> : null}
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   );
 }

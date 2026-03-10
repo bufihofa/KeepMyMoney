@@ -1,197 +1,183 @@
 ﻿/* ═══════════════════════════════════════════════════════════
-   KeepMyMoney – Premium Design System v2.0
+   KeepMyMoney – Premium Design System v3.0
+   Libraries: lucide-react, vaul, sonner, auto-animate
    ═══════════════════════════════════════════════════════════ */
 
 /* ── 1. Design Tokens ──────────────────────────────────── */
 :root {
   color-scheme: light;
-  /* Palette */
-  --bg: #f0f4fa;
+  --bg: hsl(220, 25%, 96%);
   --bg-soft: rgba(255, 255, 255, 0.72);
-  --surface: rgba(255, 255, 255, 0.82);
-  --surface-strong: #ffffff;
-  --surface-muted: rgba(226, 232, 240, 0.55);
-  --surface-glass: rgba(255, 255, 255, 0.48);
-  --border: rgba(148, 163, 184, 0.16);
-  --border-focus: rgba(20, 184, 166, 0.5);
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --text-dim: #94a3b8;
-  --primary: #14b8a6;
-  --primary-strong: #0d9488;
-  --primary-glow: rgba(20, 184, 166, 0.25);
-  --accent: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.2);
-  --success: #22c55e;
-  --success-bg: rgba(34, 197, 94, 0.1);
+  --surface: rgba(255, 255, 255, 0.88);
+  --surface-strong: #fff;
+  --surface-muted: rgba(226, 232, 240, 0.45);
+  --surface-glass: rgba(255, 255, 255, 0.4);
+  --border: rgba(148, 163, 184, 0.15);
+  --border-focus: rgba(99, 102, 241, 0.5);
+  --text: hsl(222, 47%, 11%);
+  --text-muted: hsl(215, 16%, 47%);
+  --text-dim: hsl(215, 20%, 65%);
+  --primary: hsl(160, 72%, 40%);
+  --primary-strong: hsl(162, 63%, 32%);
+  --primary-glow: rgba(16, 185, 129, 0.2);
+  --accent: hsl(239, 84%, 67%);
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
   --warning: #f59e0b;
   --warning-bg: rgba(245, 158, 11, 0.1);
   --danger: #ef4444;
   --danger-bg: rgba(239, 68, 68, 0.1);
-  --income: #22c55e;
+  --income: #10b981;
   --expense: #f97316;
-  /* Elevation */
-  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 8px 32px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 24px 64px rgba(15, 23, 42, 0.12);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 30px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.1);
   --shadow-glow: 0 0 40px var(--primary-glow);
-  /* Radius */
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 22px;
   --radius-xl: 28px;
   --radius-full: 999px;
-  /* Spacing */
   --space-xs: 0.35rem;
   --space-sm: 0.65rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  /* Transitions */
+  --space-2xl: 3rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur-fast: 0.18s;
   --dur-normal: 0.3s;
   --dur-slow: 0.5s;
-  /* Nav */
-  --nav-height: 76px;
+  --nav-height: 72px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* Font */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #070d1a;
-  --bg-soft: rgba(15, 23, 42, 0.85);
-  --surface: rgba(15, 23, 42, 0.72);
-  --surface-strong: rgba(20, 27, 45, 0.95);
-  --surface-muted: rgba(30, 41, 59, 0.65);
-  --surface-glass: rgba(15, 23, 42, 0.55);
-  --border: rgba(148, 163, 184, 0.1);
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.4);
+  --bg: hsl(222, 47%, 6%);
+  --bg-soft: rgba(15, 23, 42, 0.9);
+  --surface: rgba(22, 30, 50, 0.85);
+  --surface-strong: hsl(222, 47%, 10%);
+  --surface-muted: rgba(30, 41, 59, 0.55);
+  --surface-glass: rgba(15, 23, 42, 0.5);
+  --border: rgba(148, 163, 184, 0.08);
+  --text: hsl(210, 40%, 96%);
+  --text-muted: hsl(215, 20%, 60%);
+  --text-dim: hsl(215, 16%, 47%);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
-/* ── 2. Reset & Base ───────────────────────────────────── */
+/* ── 2. Reset ──────────────────────────────────────────── */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
-  padding: 0;
+  padding: 0
 }
 
 html,
 body,
 #root {
   min-height: 100%;
+  min-height: 100dvh
 }
 
 body {
   color: var(--text);
   background: var(--bg);
-  background-image:
-    radial-gradient(ellipse 60% 50% at 10% 0%, rgba(20, 184, 166, 0.15), transparent),
-    radial-gradient(ellipse 50% 40% at 90% 5%, rgba(99, 102, 241, 0.12), transparent);
-  background-attachment: fixed;
-  line-height: 1.5;
+  line-height: 1.55;
   overflow-x: hidden;
+  background-image: radial-gradient(ellipse 70% 50% at 5% 0%, rgba(16, 185, 129, 0.08), transparent),
+    radial-gradient(ellipse 50% 40% at 95% 5%, rgba(99, 102, 241, 0.07), transparent);
+  background-attachment: fixed
 }
 
 a {
   color: inherit;
-  text-decoration: none;
+  text-decoration: none
 }
 
 button,
 input,
 select,
 textarea {
-  font: inherit;
+  font: inherit
 }
 
 button {
   cursor: pointer;
   border: 0;
-  background: none;
+  background: none
 }
 
 img,
 svg {
-  display: block;
+  display: block
 }
 
-/* ── 3. Keyframe Animations ──────────────────────────── */
+/* ── 3. Animations ─────────────────────────────────────── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(18px)
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0)
   }
 }
 
 @keyframes fadeIn {
   from {
-    opacity: 0;
+    opacity: 0
   }
 
   to {
-    opacity: 1;
+    opacity: 1
   }
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(100%);
+    transform: translateY(100%)
   }
 
   to {
-    transform: translateY(0);
+    transform: translateY(0)
   }
 }
 
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.92)
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1)
   }
 }
 
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    background-position: -200% 0
   }
 
   100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
+    background-position: 200% 0
   }
 }
 
@@ -199,100 +185,156 @@ svg {
 
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0)
   }
 
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-8px)
   }
 }
 
 @keyframes progressFill {
   from {
-    width: 0;
-  }
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(2.5);
-    opacity: 0;
+    width: 0
   }
 }
 
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(24px)
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0)
   }
 }
 
-@keyframes countPulse {
+@keyframes pulse-ring {
   0% {
-    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35)
   }
 
-  50% {
-    transform: scale(1.05);
+  70% {
+    box-shadow: 0 0 0 10px transparent
   }
 
   100% {
-    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent
   }
 }
 
-@keyframes glowPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px var(--primary-glow);
+@keyframes spin {
+  from {
+    transform: rotate(0)
   }
 
-  50% {
-    box-shadow: 0 0 40px var(--primary-glow), 0 0 60px rgba(20, 184, 166, 0.1);
+  to {
+    transform: rotate(360deg)
   }
 }
 
-@keyframes dotBounce {
-
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-
-  40% {
-    transform: scale(1);
-  }
+.spin-icon {
+  animation: spin 1s linear infinite
 }
 
-/* Stagger utility */
 .stagger-1 {
-  animation-delay: 0.05s;
+  animation-delay: 0.04s
 }
 
 .stagger-2 {
-  animation-delay: 0.1s;
+  animation-delay: 0.08s
 }
 
 .stagger-3 {
-  animation-delay: 0.15s;
+  animation-delay: 0.12s
 }
 
 .stagger-4 {
-  animation-delay: 0.2s;
+  animation-delay: 0.16s
 }
 
 .stagger-5 {
-  animation-delay: 0.25s;
+  animation-delay: 0.2s
 }
 
-/* ── 4. Form Controls ─────────────────────────────────── */
+/* ── 4. Typography ─────────────────────────────────────── */
+h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15
+}
+
+h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 0.15rem
+}
+
+.section-copy {
+  color: var(--text-muted);
+  max-width: 36rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-top: 0.2rem
+}
+
+.mono,
+.amount,
+.metric-card strong,
+.summary-strip strong,
+.preview-card strong,
+.budget-stats strong,
+.balance-amount,
+.wallet-card__balance,
+.amount-display__value {
+  font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
+  font-weight: 600
+}
+
+/* ── 5. Lucide icon utilities ──────────────────────────── */
+.lucide {
+  flex-shrink: 0
+}
+
+.icon-xs {
+  width: 14px;
+  height: 14px
+}
+
+.icon-sm {
+  width: 16px;
+  height: 16px
+}
+
+.icon-md {
+  width: 20px;
+  height: 20px
+}
+
+.icon-lg {
+  width: 24px;
+  height: 24px
+}
+
+/* ── 6. Form Controls ──────────────────────────────────── */
 input,
 select,
 textarea {
@@ -301,29 +343,27 @@ textarea {
   background: var(--surface-strong);
   color: var(--text);
   border-radius: var(--radius-sm);
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 1rem;
   outline: none;
-  transition: border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-  font-size: 0.95rem;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  font-size: 0.92rem
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow)
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--text-dim);
+  color: var(--text-dim)
 }
 
 textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 76px
 }
 
 select {
@@ -332,212 +372,155 @@ select {
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
-  padding-right: 2.5rem;
+  padding-right: 2.5rem
 }
 
-/* ── 5. Typography ─────────────────────────────────────── */
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--primary);
-  margin-bottom: 0.2rem;
-}
-
-.section-copy {
-  color: var(--text-muted);
-  max-width: 36rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-top: 0.25rem;
-}
-
-h1 {
-  font-size: 1.65rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-h2 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-h3 {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-/* Mono for numbers */
-.mono,
-.amount,
-.metric-card strong,
-.summary-strip strong,
-.preview-card strong,
-.budget-stats strong,
-.balance-amount {
-  font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
-  font-weight: 600;
-}
-
-/* ── 6. App Shell ──────────────────────────────────────── */
+/* ── 7. App Shell ──────────────────────────────────────── */
 .app-shell {
   position: relative;
   min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh
 }
 
 .app-shell__content {
   max-width: 680px;
   margin: 0 auto;
-  padding: 1rem 1rem calc(var(--nav-height) + var(--safe-bottom) + 1.5rem);
+  padding: 1rem 1rem calc(var(--nav-height) + var(--safe-bottom) + 1.5rem)
 }
 
 .app-shell__glow {
   position: fixed;
-  width: 20rem;
-  height: 20rem;
   border-radius: 999px;
-  filter: blur(80px);
-  opacity: 0.3;
+  filter: blur(90px);
+  opacity: 0.25;
   pointer-events: none;
-  z-index: 0;
+  z-index: 0
 }
 
 .app-shell__glow--one {
-  top: -8rem;
-  left: -6rem;
-  background: rgba(20, 184, 166, 0.35);
+  top: -10rem;
+  left: -8rem;
+  width: 24rem;
+  height: 24rem;
+  background: rgba(16, 185, 129, 0.3)
 }
 
 .app-shell__glow--two {
-  top: 20%;
-  right: -8rem;
-  background: rgba(99, 102, 241, 0.25);
+  top: 15%;
+  right: -10rem;
+  width: 22rem;
+  height: 22rem;
+  background: rgba(99, 102, 241, 0.2)
 }
 
-/* ── 7. Bottom Navigation ──────────────────────────────── */
+/* ── 8. Bottom Navigation ──────────────────────────────── */
 .bottom-nav {
   position: fixed;
   left: 50%;
-  bottom: var(--safe-bottom);
+  bottom: calc(var(--safe-bottom) + 6px);
   transform: translateX(-50%);
-  width: min(480px, calc(100% - 1rem));
+  width: min(480px, calc(100% - 12px));
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  padding: 0.5rem 0.4rem;
+  padding: 6px;
   border-radius: var(--radius-xl);
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(24px) saturate(1.8);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.15), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.12), inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
   z-index: 40;
-  animation: slideUp var(--dur-slow) var(--ease-out) both;
+  animation: slideUp var(--dur-slow) var(--ease-out) both
 }
 
 .bottom-nav__item {
   position: relative;
-  min-height: 3rem;
+  min-height: 2.8rem;
   border-radius: var(--radius-md);
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(148, 163, 184, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.65rem;
+  gap: 3px;
+  font-size: 0.6rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  transition: color var(--dur-fast) var(--ease-out);
+  letter-spacing: 0.03em;
+  transition: color var(--dur-fast) var(--ease-out)
 }
 
 .bottom-nav__item svg {
-  width: 1.15rem;
-  height: 1.15rem;
-  transition: transform var(--dur-fast) var(--ease-spring);
+  width: 18px;
+  height: 18px;
+  transition: transform var(--dur-fast) var(--ease-spring)
 }
 
 .bottom-nav__item--active {
-  color: #ffffff;
+  color: #fff
 }
 
 .bottom-nav__item--active svg {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.5));
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5))
 }
 
 .bottom-nav__item--active::after {
   content: '';
   position: absolute;
-  bottom: 0.15rem;
+  bottom: 3px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
   border-radius: 999px;
   background: var(--primary);
-  box-shadow: 0 0 8px var(--primary);
-  animation: scaleIn var(--dur-normal) var(--ease-spring) both;
+  box-shadow: 0 0 10px var(--primary);
+  animation: scaleIn var(--dur-normal) var(--ease-spring) both
 }
 
-/* ── 8. FAB Button ─────────────────────────────────────── */
+/* ── 9. FAB ────────────────────────────────────────────── */
 .fab-button {
   position: fixed;
   right: max(1rem, calc(50% - 260px));
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 0.75rem);
-  width: 3.5rem;
-  height: 3.5rem;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  width: 56px;
+  height: 56px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.35), 0 0 0 0 rgba(20, 184, 166, 0);
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   z-index: 45;
-  transition: transform var(--dur-fast) var(--ease-spring),
-    box-shadow var(--dur-normal) var(--ease-out);
-  animation: scaleIn var(--dur-slow) var(--ease-spring) 0.2s both;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-normal) var(--ease-out);
+  animation: scaleIn var(--dur-slow) var(--ease-spring) 0.2s both, pulse-ring 3s ease-out 1s infinite
 }
 
 .fab-button:active {
   transform: scale(0.9);
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25)
 }
 
 .fab-button svg {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 22px;
+  height: 22px
 }
 
-/* ── 9. Page Layout ────────────────────────────────────── */
+/* ── 10. Pages ─────────────────────────────────────────── */
 .page {
   display: grid;
   gap: var(--space-md);
-  animation: fadeInUp var(--dur-slow) var(--ease-out) both;
+  animation: fadeInUp var(--dur-slow) var(--ease-out) both
 }
 
 .page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-md);
+  gap: var(--space-md)
 }
 
-.page-header h1,
-.panel__header h2,
-.modal-header h3,
-.splash-card h1,
-.onboarding-hero h1 {
-  margin: 0;
-}
-
-/* ── 10. Hero Card ─────────────────────────────────────── */
+/* ── 11. Cards ─────────────────────────────────────────── */
 .hero-card,
 .panel,
 .splash-card,
@@ -550,39 +533,38 @@ h3 {
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  overflow: hidden;
+  overflow: hidden
 }
 
 .hero-card,
 .panel,
 .onboarding-form,
 .onboarding-hero {
-  padding: 1.15rem;
+  padding: 1.15rem
 }
 
 .hero-card {
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(13, 148, 136, 0.75));
+  background: linear-gradient(145deg, hsl(222, 47%, 10%), hsl(162, 55%, 28%));
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.07)
 }
 
 .hero-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15), transparent 60%),
-    radial-gradient(circle at 20% 80%, rgba(20, 184, 166, 0.1), transparent 50%);
-  pointer-events: none;
+  background: radial-gradient(circle at 80% 15%, rgba(99, 102, 241, 0.12), transparent 55%), radial-gradient(circle at 15% 85%, rgba(16, 185, 129, 0.08), transparent 45%);
+  pointer-events: none
 }
 
 .hero-card .eyebrow {
-  color: rgba(148, 226, 213, 0.8);
+  color: rgba(167, 243, 208, 0.7)
 }
 
 .hero-card .section-copy,
 .hero-card small,
 .hero-card span {
-  color: rgba(226, 232, 240, 0.7);
+  color: rgba(226, 232, 240, 0.65)
 }
 
 .hero-card__heading,
@@ -592,110 +574,117 @@ h3 {
   justify-content: space-between;
   gap: var(--space-md);
   position: relative;
-  z-index: 1;
+  z-index: 1
 }
 
 .panel__header--compact {
-  align-items: flex-start;
+  align-items: flex-start
 }
 
-/* ── 11. Metric Cards ──────────────────────────────────── */
+.panel--dense {
+  padding: 0.85rem
+}
+
+/* ── 12. Metrics ───────────────────────────────────────── */
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.65rem;
-  margin-top: 0.85rem;
+  gap: 0.6rem;
+  margin-top: 0.85rem
 }
 
 .metric-grid--tight {
-  margin-top: 0;
+  margin-top: 0
 }
 
 .metric-card {
-  padding: 0.85rem;
+  padding: 0.8rem;
   border-radius: var(--radius-md);
   background: var(--surface-muted);
   backdrop-filter: blur(8px);
   display: grid;
-  gap: 0.25rem;
+  gap: 0.2rem;
   transition: transform var(--dur-fast) var(--ease-spring);
-  animation: fadeInUp var(--dur-slow) var(--ease-out) both;
+  animation: fadeInUp var(--dur-slow) var(--ease-out) both
 }
 
 .metric-card:nth-child(1) {
-  animation-delay: 0.05s;
+  animation-delay: 0.04s
 }
 
 .metric-card:nth-child(2) {
-  animation-delay: 0.1s;
+  animation-delay: 0.08s
 }
 
 .metric-card:nth-child(3) {
-  animation-delay: 0.15s;
+  animation-delay: 0.12s
 }
 
 .metric-card:active {
-  transform: scale(0.97);
+  transform: scale(0.97)
 }
 
 .metric-card span {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px
 }
 
 .metric-card strong {
-  font-size: 1.05rem;
+  font-size: 1rem
 }
 
 .metric-card small {
-  font-size: 0.7rem;
-  color: var(--text-dim);
+  font-size: 0.68rem;
+  color: var(--text-dim)
 }
 
 .metric-card--positive strong,
 .amount--positive,
 .status-text--safe {
-  color: var(--success);
+  color: var(--success)
 }
 
 .metric-card--negative strong,
 .amount--negative,
 .status-text--danger,
 .status-text--over {
-  color: var(--danger);
+  color: var(--danger)
 }
 
 .amount--neutral {
-  color: var(--primary);
+  color: var(--primary)
 }
 
 .status-text--watch {
-  color: var(--warning);
+  color: var(--warning)
 }
 
-/* ── 12. Split & Chart Layout ──────────────────────────── */
+/* ── 13. Layout Grids ──────────────────────────────────── */
 .split-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: var(--space-md)
 }
 
 .chart-card,
 .chart-box {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-md)
 }
 
 .chart-box--split {
   grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.8fr);
-  align-items: center;
+  align-items: center
 }
 
-/* ── 13. Lists ─────────────────────────────────────────── */
+/* ── 14. Lists ─────────────────────────────────────────── */
 .legend-list,
 .stack-list {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.5rem
 }
 
 .legend-row,
@@ -709,7 +698,7 @@ h3 {
 .filter-row,
 .budget-stats {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.6rem
 }
 
 .legend-row,
@@ -722,23 +711,23 @@ h3 {
 .budget-stats,
 .legend-row__label {
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between
 }
 
 .toolbar-grid {
-  flex-direction: column;
+  flex-direction: column
 }
 
 .filter-row {
-  flex-wrap: wrap;
+  flex-wrap: wrap
 }
 
-/* ── 14. Chips & Buttons ──────────────────────────────── */
+/* ── 15. Buttons ───────────────────────────────────────── */
 .chip-row,
 .feature-points {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem
 }
 
 .chip-button,
@@ -750,29 +739,27 @@ h3 {
 .icon-button {
   border: 0;
   border-radius: var(--radius-full);
-  transition: transform var(--dur-fast) var(--ease-spring),
-    background var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   font-weight: 500;
-  font-size: 0.85rem;
+  font-size: 0.82rem
 }
 
 .chip-button,
 .feature-chip {
-  padding: 0.55rem 0.85rem;
+  padding: 0.5rem 0.8rem;
   background: var(--surface-muted);
-  color: var(--text-muted);
+  color: var(--text-muted)
 }
 
 .chip-button--active {
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(99, 102, 241, 0.1));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(99, 102, 241, 0.08));
   color: var(--primary-strong);
-  box-shadow: inset 0 0 0 1.5px rgba(20, 184, 166, 0.3);
+  box-shadow: inset 0 0 0 1.5px rgba(16, 185, 129, 0.25)
 }
 
 .chip-button:active,
 .feature-chip:active {
-  transform: scale(0.95);
+  transform: scale(0.95)
 }
 
 .primary-button,
@@ -781,197 +768,172 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.75rem 1.1rem;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem
 }
 
 .primary-button {
   color: white;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   box-shadow: 0 4px 16px var(--primary-glow);
-  font-weight: 600;
+  font-weight: 600
 }
 
 .primary-button:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 8px var(--primary-glow);
+  box-shadow: 0 2px 8px var(--primary-glow)
 }
 
 .primary-button svg {
-  width: 1rem;
-  height: 1rem;
+  width: 16px;
+  height: 16px
 }
 
 .soft-button {
   background: var(--surface-muted);
-  color: var(--text);
+  color: var(--text)
 }
 
 .soft-button:active {
-  transform: scale(0.96);
+  transform: scale(0.96)
 }
 
 .soft-button--danger {
   color: white;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #ef4444, #dc2626)
 }
 
 .text-link {
   color: var(--primary);
   padding: 0;
   background: transparent;
-  font-weight: 600;
+  font-weight: 600
 }
 
 .text-link:active {
-  opacity: 0.7;
+  opacity: 0.7
 }
 
 .icon-button {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
   display: grid;
   place-items: center;
   background: var(--surface-muted);
   color: var(--text-muted);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm)
 }
 
 .icon-button:active {
-  transform: scale(0.9);
+  transform: scale(0.9)
 }
 
 .icon-button--ghost {
   background: transparent;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--border)
 }
 
-.icon-button svg,
-.transaction-row__icon svg,
-.empty-state__icon svg {
-  width: 1.1rem;
-  height: 1.1rem;
+.icon-button svg {
+  width: 16px;
+  height: 16px
 }
 
 button:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
-  transform: none !important;
+  transform: none !important
 }
 
-/* ── 15. Form Fields ───────────────────────────────────── */
+/* ── 16. Form Fields ───────────────────────────────────── */
 .field,
 .sheet-form,
 .preview-card,
 .empty-state {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem
 }
 
 .field span {
   font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  color: var(--text-muted)
 }
 
 .field small {
   color: var(--danger);
-  font-size: 0.78rem;
+  font-size: 0.75rem
 }
 
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
+  gap: 0.6rem
 }
 
 .check-field {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.85rem;
+  gap: 0.7rem;
+  padding: 0.8rem;
   border-radius: var(--radius-md);
   background: var(--surface-muted);
-  transition: background var(--dur-fast) var(--ease-out);
+  transition: background var(--dur-fast) var(--ease-out)
 }
 
 .check-field:active {
-  background: var(--surface-glass);
+  background: var(--surface-glass)
 }
 
 .check-field input {
   width: auto;
   margin-top: 0.15rem;
-  accent-color: var(--primary);
+  accent-color: var(--primary)
 }
 
 .check-field strong {
-  font-size: 0.9rem;
+  font-size: 0.88rem
 }
 
 .check-field span {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem
 }
 
-.panel--dense {
-  padding: 0.85rem;
-}
-
-/* ── 16. Summary Strip ─────────────────────────────────── */
-.summary-strip {
-  margin-top: 0.75rem;
-  padding: 0.85rem;
-  border-radius: var(--radius-md);
-  background: var(--surface-muted);
-}
-
-.summary-strip>div,
-.budget-stats>div {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.summary-strip span {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-}
-
-/* ── 17. Search Bar ────────────────────────────────────── */
+/* ── 17. Search ────────────────────────────────────────── */
 .search-field {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0 0.85rem;
+  padding: 0 0.8rem;
   background: var(--surface-strong);
-  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out)
 }
 
 .search-field:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow)
 }
 
 .search-field svg {
   flex-shrink: 0;
   color: var(--text-dim);
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 18px;
+  height: 18px
 }
 
 .search-field input {
   border: 0;
   background: transparent;
   padding-left: 0;
-  padding-right: 0;
+  padding-right: 0
 }
 
 .search-field input:focus {
-  box-shadow: none;
+  box-shadow: none
 }
 
 /* ── 18. Transaction Rows ──────────────────────────────── */
@@ -980,64 +942,73 @@ button:disabled {
   border: 0;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 0.7rem;
+  padding: 0.7rem;
   border-radius: var(--radius-md);
   background: var(--surface-muted);
   color: inherit;
   text-align: left;
   transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast) var(--ease-out);
-  animation: fadeInUp var(--dur-normal) var(--ease-out) both;
+  animation: fadeInUp var(--dur-normal) var(--ease-out) both
 }
 
 .transaction-row:active {
   transform: scale(0.98);
-  background: var(--surface-glass);
+  background: var(--surface-glass)
 }
 
 .transaction-row--card {
   background: transparent;
-  padding: 0;
+  padding: 0
 }
 
 .transaction-row__main {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.7rem;
   border: 0;
   background: var(--surface-muted);
-  padding: 0.75rem;
+  padding: 0.7rem;
   border-radius: var(--radius-md);
   color: inherit;
   text-align: left;
-  transition: transform var(--dur-fast) var(--ease-spring);
+  transition: transform var(--dur-fast) var(--ease-spring)
 }
 
 .transaction-row__main:active {
-  transform: scale(0.98);
+  transform: scale(0.98)
 }
 
 .transaction-row__icon,
 .empty-state__icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
   flex: 0 0 auto;
   border-radius: var(--radius-sm);
   color: white;
   display: grid;
-  place-items: center;
+  place-items: center
+}
+
+.transaction-row__icon svg,
+.empty-state__icon svg {
+  width: 16px;
+  height: 16px
 }
 
 .transaction-row__content {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.1rem;
   min-width: 0;
-  flex: 1;
+  flex: 1
 }
 
 .transaction-row__content strong {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
 }
 
 .transaction-row__content span,
@@ -1045,37 +1016,55 @@ button:disabled {
 .budget-card__top span,
 .metric-card small,
 .preview-card small,
-.modal-header p,
 .empty-state p {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem
 }
 
-/* ── 19. Budget Cards ──────────────────────────────────── */
+/* ── 19. Summary ───────────────────────────────────────── */
+.summary-strip {
+  margin-top: 0.65rem;
+  padding: 0.8rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted)
+}
+
+.summary-strip>div,
+.budget-stats>div {
+  display: grid;
+  gap: 0.15rem
+}
+
+.summary-strip span {
+  font-size: 0.72rem;
+  color: var(--text-dim)
+}
+
+/* ── 20. Budget Cards ──────────────────────────────────── */
 .budget-card,
 .preview-card,
 .empty-state {
-  padding: 0.85rem;
+  padding: 0.8rem;
   border-radius: var(--radius-md);
-  background: var(--surface-muted);
+  background: var(--surface-muted)
 }
 
 .budget-panel {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.6rem
 }
 
 .preview-card--danger {
-  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border: 1.5px solid rgba(239, 68, 68, 0.25)
 }
 
 .progress-bar {
   width: 100%;
-  height: 0.55rem;
+  height: 6px;
   overflow: hidden;
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.1);
   border-radius: var(--radius-full);
-  position: relative;
+  position: relative
 }
 
 .progress-bar span {
@@ -1083,66 +1072,62 @@ button:disabled {
   height: 100%;
   border-radius: inherit;
   animation: progressFill var(--dur-slow) var(--ease-out) both;
-  position: relative;
+  position: relative
 }
 
 .progress-bar span::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shimmer 2s ease-in-out infinite;
-  background-size: 200% 100%;
+  background-size: 200% 100%
 }
 
 .progress-bar--large {
-  height: 0.65rem;
-  margin: 0.75rem 0;
+  height: 8px;
+  margin: 0.6rem 0
 }
 
-/* ── 20. Status Pills ─────────────────────────────────── */
 .status-pill {
-  padding: 0.35rem 0.6rem;
-  font-size: 0.7rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  text-transform: capitalize;
+  text-transform: capitalize
 }
 
 .status-pill--safe {
   background: var(--success-bg);
-  color: var(--success);
+  color: var(--success)
 }
 
 .status-pill--watch {
   background: var(--warning-bg);
-  color: var(--warning);
+  color: var(--warning)
 }
 
 .status-pill--danger,
 .status-pill--over {
   background: var(--danger-bg);
-  color: var(--danger);
+  color: var(--danger)
 }
 
 /* ── 21. Legend ─────────────────────────────────────────── */
 .legend-dot {
-  width: 0.6rem;
-  height: 0.6rem;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-full);
-  display: inline-block;
+  display: inline-block
 }
 
 .legend-row__label {
   justify-content: flex-start;
-  gap: 0.5rem;
+  gap: 0.45rem
 }
 
-.legend-row {
-  font-size: 0.85rem;
-}
-
+.legend-row,
 .legend-row strong {
-  font-size: 0.85rem;
+  font-size: 0.82rem
 }
 
 /* ── 22. Empty State ───────────────────────────────────── */
@@ -1150,25 +1135,25 @@ button:disabled {
   text-align: center;
   justify-items: center;
   padding-block: 2.5rem;
-  animation: fadeIn var(--dur-slow) var(--ease-out) both;
+  animation: fadeIn var(--dur-slow) var(--ease-out) both
 }
 
 .empty-state__icon {
   background: linear-gradient(135deg, var(--primary-glow), var(--accent-glow));
-  animation: float 3s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite
 }
 
 .empty-state h3 {
-  margin-top: 0.5rem;
+  margin-top: 0.5rem
 }
 
 .empty-state p {
   max-width: 20rem;
-  font-size: 0.85rem;
+  font-size: 0.82rem
 }
 
 .empty-state__action {
-  margin-top: 0.75rem;
+  margin-top: 0.65rem
 }
 
 /* ── 23. Onboarding ────────────────────────────────────── */
@@ -1180,7 +1165,7 @@ button:disabled {
   justify-content: center;
   align-items: center;
   gap: var(--space-lg);
-  padding: var(--space-lg);
+  padding: var(--space-lg)
 }
 
 .onboarding-hero {
@@ -1188,26 +1173,26 @@ button:disabled {
   text-align: center;
   max-width: 28rem;
   width: 100%;
-  animation: fadeInUp var(--dur-slow) var(--ease-out) both;
+  animation: fadeInUp var(--dur-slow) var(--ease-out) both
 }
 
 .onboarding-hero h1 {
-  font-size: 1.5rem;
+  font-size: 1.4rem
 }
 
 .onboarding-form {
   max-width: 28rem;
   width: 100%;
-  animation: fadeInUp var(--dur-slow) var(--ease-out) 0.15s both;
+  animation: fadeInUp var(--dur-slow) var(--ease-out) 0.15s both
 }
 
 .feature-points {
   justify-content: center;
-  margin-top: var(--space-md);
+  margin-top: var(--space-md)
 }
 
 .feature-chip {
-  font-size: 0.78rem;
+  font-size: 0.75rem
 }
 
 /* ── 24. Splash ────────────────────────────────────────── */
@@ -1215,397 +1200,366 @@ button:disabled {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: var(--space-lg);
+  padding: var(--space-lg)
 }
 
 .splash-card {
   max-width: 28rem;
   padding: var(--space-xl);
   text-align: center;
+  animation: scaleIn var(--dur-slow) var(--ease-out) both
 }
 
-/* ── 25. Modal / Sheet ─────────────────────────────────── */
-.modal-backdrop {
-  position: fixed;
+.splash-loader {
+  margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: center;
+  color: var(--primary)
+}
+
+/* ── 25. Vaul Drawer ───────────────────────────────────── */
+[vaul-overlay] {
+  position: fixed !important;
   inset: 0;
-  border: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 70;
+  z-index: 70
 }
 
-.modal-sheet {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: min(520px, 100%);
-  max-height: calc(100vh - 1rem);
-  max-height: calc(100dvh - 1rem);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+.drawer-overlay {
+  position: fixed !important;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 70
+}
+
+[vaul-drawer],
+.drawer-content {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-height: 92vh;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--surface-strong);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   box-shadow: var(--shadow-lg);
   z-index: 80;
+  outline: none
 }
 
-.modal-sheet::before {
-  content: '';
-  display: block;
-  width: 2.5rem;
-  height: 0.25rem;
+.drawer-handle {
+  width: 36px;
+  height: 4px;
   background: var(--text-dim);
   border-radius: var(--radius-full);
-  margin: 0.6rem auto 0;
-  opacity: 0.4;
+  margin: 10px auto 0;
+  opacity: 0.35;
+  flex-shrink: 0
 }
 
-.modal-header,
-.modal-footer {
+.drawer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 0.6rem 1.15rem 0;
+  margin: 0
+}
+
+.drawer-description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.15rem 1.15rem 0;
+  margin: 0
+}
+
+.drawer-body {
+  overflow-y: auto;
+  padding: 0.85rem 1.15rem 1.15rem;
+  overscroll-behavior: contain;
+  flex: 1
+}
+
+.drawer-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: 0.85rem 1.15rem;
-}
-
-.modal-header {
-  padding-top: 0.5rem;
-}
-
-.modal-header h3 {
-  font-size: 1.05rem;
-}
-
-.modal-header p {
-  font-size: 0.82rem;
-  margin-top: 0.1rem;
-}
-
-.modal-body {
-  overflow: auto;
-  padding: 0 1.15rem 1.15rem;
-  overscroll-behavior: contain;
-}
-
-.modal-footer {
-  border-top: 1px solid var(--border);
-}
-
-.sheet-form {
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: 0.8rem 1.15rem;
+  border-top: 1px solid var(--border)
 }
 
 /* ── 26. Segmented Control ─────────────────────────────── */
 .segmented-control {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.3rem;
-  padding: 0.25rem;
+  gap: 3px;
+  padding: 3px;
   background: var(--surface-muted);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm)
 }
 
 .segmented-control__item {
-  padding: 0.7rem 0.5rem;
+  padding: 0.65rem 0.4rem;
   border-radius: var(--radius-xs);
   background: transparent;
   color: var(--text-muted);
   text-transform: capitalize;
   font-weight: 500;
-  font-size: 0.85rem;
-  transition: all var(--dur-fast) var(--ease-out);
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all var(--dur-fast) var(--ease-out)
+}
+
+.segmented-control__item svg {
+  width: 14px;
+  height: 14px
 }
 
 .segmented-control__item--active {
   background: var(--surface-strong);
   color: var(--text);
-  box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border);
+  box-shadow: var(--shadow-xs), inset 0 0 0 1px var(--border)
 }
 
 .segmented-control__item:active {
-  transform: scale(0.96);
+  transform: scale(0.96)
 }
 
-/* ── 27. Toast Notifications ───────────────────────────── */
-.toast-viewport {
-  position: fixed;
-  left: 50%;
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 4rem);
-  transform: translateX(-50%);
-  width: min(380px, calc(100% - 2rem));
-  z-index: 90;
-  display: grid;
-  gap: 0.5rem;
-  pointer-events: none;
-}
-
-.toast {
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(12px);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  box-shadow: var(--shadow-lg);
-  pointer-events: auto;
-}
-
-.toast strong {
-  font-size: 0.88rem;
-}
-
-.toast span {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.82rem;
-}
-
-.toast--success {
-  border-left: 3px solid var(--success);
-}
-
-.toast--danger {
-  border-left: 3px solid var(--danger);
-}
-
-.toast--info {
-  border-left: 3px solid var(--accent);
-}
-
-/* ── 28. Color/Icon Picker Grids ───────────────────────── */
+/* ── 27. Pickers ───────────────────────────────────────── */
 .picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(2.4rem, 1fr));
+  gap: 0.45rem
 }
 
 .picker-swatch {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: var(--radius-sm);
   border: 2px solid transparent;
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease-out);
   display: grid;
-  place-items: center;
+  place-items: center
 }
 
 .picker-swatch:active {
-  transform: scale(0.88);
+  transform: scale(0.85)
 }
 
 .picker-swatch--selected {
   border-color: var(--text);
-  box-shadow: 0 0 0 2px var(--surface-strong), 0 0 0 4px var(--text);
+  box-shadow: 0 0 0 2px var(--surface-strong), 0 0 0 4px var(--text)
 }
 
 .picker-swatch svg {
-  width: 0.9rem;
-  height: 0.9rem;
-  color: white;
+  width: 14px;
+  height: 14px;
+  color: white
 }
 
 .icon-picker-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.45rem;
+  gap: 0.4rem
 }
 
 .icon-picker-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.55rem 0.35rem;
+  gap: 3px;
+  padding: 0.5rem 0.3rem;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--border);
   background: var(--surface-muted);
   cursor: pointer;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
-  transition: all var(--dur-fast) var(--ease-spring);
+  transition: all var(--dur-fast) var(--ease-spring)
 }
 
 .icon-picker-item:active {
-  transform: scale(0.92);
+  transform: scale(0.9)
 }
 
 .icon-picker-item--selected {
   border-color: var(--primary);
   background: var(--primary-glow);
-  color: var(--primary-strong);
+  color: var(--primary-strong)
 }
 
 .icon-picker-item svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px
 }
 
-/* ── 29. Category Grid Picker ──────────────────────────── */
+/* ── 28. Category Grid ─────────────────────────────────── */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.45rem;
+  gap: 0.4rem
 }
 
 .category-grid-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.65rem 0.25rem;
+  gap: 0.25rem;
+  padding: 0.6rem 0.2rem;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border);
   background: var(--surface-muted);
   cursor: pointer;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   transition: all var(--dur-fast) var(--ease-spring);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.2
 }
 
 .category-grid-item:active {
-  transform: scale(0.93);
+  transform: scale(0.93)
 }
 
 .category-grid-item--selected {
   border-color: var(--primary);
   background: var(--primary-glow);
-  color: var(--text);
+  color: var(--text)
 }
 
 .category-grid-item__icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.1rem;
+  height: 2.1rem;
   border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
-  color: white;
+  color: white
 }
 
 .category-grid-item__icon svg {
-  width: 1rem;
-  height: 1rem;
+  width: 14px;
+  height: 14px
 }
 
-/* ── 30. Wallet Picker ─────────────────────────────────── */
+/* ── 29. Wallet Picker ─────────────────────────────────── */
 .wallet-picker {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem
 }
 
 .wallet-picker-item {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.75rem;
+  gap: 0.6rem;
+  padding: 0.7rem;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border);
   background: var(--surface-muted);
   cursor: pointer;
-  transition: all var(--dur-fast) var(--ease-spring);
+  transition: all var(--dur-fast) var(--ease-spring)
 }
 
 .wallet-picker-item:active {
-  transform: scale(0.97);
+  transform: scale(0.97)
 }
 
 .wallet-picker-item--selected {
   border-color: var(--primary);
-  background: var(--primary-glow);
+  background: var(--primary-glow)
 }
 
 .wallet-picker-item__icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.1rem;
+  height: 2.1rem;
   border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
-  color: white;
+  color: white
 }
 
 .wallet-picker-item__icon svg {
-  width: 1rem;
-  height: 1rem;
+  width: 14px;
+  height: 14px
 }
 
 .wallet-picker-item__info {
   flex: 1;
   display: grid;
-  gap: 0.1rem;
+  gap: 0.05rem
 }
 
 .wallet-picker-item__info strong {
-  font-size: 0.88rem;
+  font-size: 0.85rem
 }
 
 .wallet-picker-item__info span {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  color: var(--text-muted)
 }
 
-/* ── 31. Amount Display ────────────────────────────────── */
+/* ── 30. Amount Display ────────────────────────────────── */
 .amount-display {
   text-align: center;
-  padding: var(--space-lg) 0 var(--space-md);
+  padding: var(--space-lg) 0 var(--space-md)
 }
 
 .amount-display__value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--text), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-clip: text
 }
 
 .amount-display__currency {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  margin-top: 0.2rem;
+  margin-top: 0.15rem
 }
 
-/* ── 32. Wallet Balance Cards ──────────────────────────── */
+/* ── 31. Wallet Carousel ───────────────────────────────── */
 .wallet-carousel {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.6rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0.5rem;
-  scrollbar-width: none;
+  padding-bottom: 0.4rem;
+  scrollbar-width: none
 }
 
 .wallet-carousel::-webkit-scrollbar {
-  display: none;
+  display: none
 }
 
 .wallet-card {
   flex: 0 0 auto;
-  width: min(200px, 75vw);
+  width: min(200px, 72vw);
   padding: 1rem;
   border-radius: var(--radius-lg);
   color: white;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.4rem;
   scroll-snap-align: start;
   transition: transform var(--dur-fast) var(--ease-spring);
   position: relative;
-  overflow: hidden;
+  overflow: hidden
 }
 
 .wallet-card:active {
-  transform: scale(0.97);
+  transform: scale(0.97)
 }
 
 .wallet-card::after {
@@ -1616,28 +1570,27 @@ button:disabled {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06)
 }
 
 .wallet-card__name {
-  font-size: 0.78rem;
-  opacity: 0.8;
-  font-weight: 500;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  font-weight: 500
 }
 
 .wallet-card__balance {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 700
 }
 
 .wallet-card__type {
-  font-size: 0.68rem;
-  opacity: 0.6;
-  text-transform: capitalize;
+  font-size: 0.65rem;
+  opacity: 0.55;
+  text-transform: capitalize
 }
 
-/* ── 33. Confirm Dialog ────────────────────────────────── */
+/* ── 32. Confirm Dialog ────────────────────────────────── */
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -1646,7 +1599,7 @@ button:disabled {
   display: grid;
   place-items: center;
   z-index: 100;
-  padding: 1rem;
+  padding: 1rem
 }
 
 .confirm-dialog {
@@ -1658,130 +1611,150 @@ button:disabled {
   text-align: center;
   box-shadow: var(--shadow-lg);
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-md)
 }
 
 .confirm-dialog h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem
 }
 
 .confirm-dialog p {
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.85rem
 }
 
 .confirm-dialog__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  gap: 0.45rem
 }
 
-/* ── 34. Setting Rows ──────────────────────────────────── */
+/* ── 33. Settings ──────────────────────────────────────── */
 .setting-row {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border)
 }
 
 .setting-row:last-child {
-  border-bottom: 0;
+  border-bottom: 0
 }
 
 .setting-row>div:first-child {
-  flex: 1;
+  flex: 1
 }
 
 .setting-row strong {
-  font-size: 0.9rem;
-  display: block;
+  font-size: 0.88rem;
+  display: block
 }
 
 .setting-row span {
-  font-size: 0.78rem;
+  font-size: 0.75rem
 }
 
-/* ── 35. Responsive ────────────────────────────────────── */
-@media (max-width:640px) {
+/* ── 34. Sonner overrides ──────────────────────────────── */
+[data-sonner-toaster] {
+  --normal-bg: rgba(15, 23, 42, 0.94) !important;
+  --normal-text: #fff !important;
+  --normal-border: rgba(255, 255, 255, 0.06) !important
+}
+
+[data-sonner-toast] {
+  border-radius: var(--radius-md) !important;
+  backdrop-filter: blur(12px);
+  font-family: inherit !important
+}
+
+/* ── 35. Recharts overrides ────────────────────────────── */
+.recharts-default-tooltip {
+  background: rgba(15, 23, 42, 0.92) !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  box-shadow: var(--shadow-lg) !important
+}
+
+.recharts-tooltip-label {
+  color: rgba(255, 255, 255, 0.55) !important
+}
+
+.donut-wrap {
+  display: grid
+}
+
+/* ── 36. Responsive ────────────────────────────────────── */
+@media(max-width:640px) {
   h1 {
-    font-size: 1.4rem;
+    font-size: 1.35rem
   }
 
   .split-grid,
-  .metric-grid,
   .field-grid,
   .chart-box--split {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr
   }
 
   .metric-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr)
   }
 
   .metric-card strong {
-    font-size: 0.9rem;
+    font-size: 0.88rem
   }
 
   .hero-card,
   .panel,
   .onboarding-form,
   .onboarding-hero {
-    padding: 0.9rem;
+    padding: 0.85rem
   }
 
   .page-header,
   .panel__header,
-  .hero-card__heading,
-  .modal-header,
-  .modal-footer {
+  .hero-card__heading {
     flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .modal-footer {
-    flex-direction: row;
+    align-items: flex-start
   }
 
   .category-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr)
   }
 
   .fab-button {
-    right: 0.85rem;
-    width: 3.2rem;
-    height: 3.2rem;
+    right: 0.8rem;
+    width: 50px;
+    height: 50px
   }
 
   .fab-button svg {
-    width: 1.15rem;
-    height: 1.15rem;
+    width: 20px;
+    height: 20px
   }
 
   .bottom-nav {
-    width: calc(100% - 0.75rem);
-  }
-
-  .toast-viewport {
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 8px)
   }
 
   .app-shell__content {
-    padding-top: 0.75rem;
+    padding-top: 0.65rem
   }
 }
 
-@media (min-width:641px) {
-  .modal-sheet {
-    bottom: 50%;
-    left: 50%;
-    transform: translate(-50%, 50%);
-    border-radius: var(--radius-xl);
-  }
+@media(min-width:641px) {
 
-  .modal-sheet::before {
-    display: none;
+  [vaul-drawer],
+  .drawer-content {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: 520px;
+    border-radius: var(--radius-xl) !important;
+    bottom: 50% !important
   }
 }
 
-/* ── 36. Utilities ─────────────────────────────────────── */
+/* ── 37. Utilities ─────────────────────────────────────── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1791,13 +1764,9 @@ button:disabled {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-  border: 0;
+  border: 0
 }
 
 .text-center {
-  text-align: center;
-}
-
-.donut-wrap {
-  display: grid;
+  text-align: center
 }

@@ -1,5 +1,8 @@
 ﻿import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { toast } from 'sonner';
+import { Plus, Search, Copy, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { IconGlyph } from '../../components/ui/IconGlyph';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -9,50 +12,50 @@ import { formatCurrency, formatRelativeDate } from '../../domain/format';
 import { useAppData } from '../../hooks/useAppData';
 import { useUIStore } from '../../stores/uiStore';
 
-const staggerItem = {
+const stagger = {
   hidden: { opacity: 0, y: 10 },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.04, duration: 0.3, ease: [0.16, 1, 0.3, 1] } }),
 };
 
 export function TransactionsPage() {
   const data = useAppData();
-  const openTransactionSheet = useUIStore((state) => state.openTransactionSheet);
-  const addToast = useUIStore((state) => state.addToast);
+  const openTransactionSheet = useUIStore((s) => s.openTransactionSheet);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income' | 'transfer'>('all');
   const [walletFilter, setWalletFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [listRef] = useAutoAnimate();
 
-  const categoryMap = useMemo(() => buildCategoryLabelMap(data.categories), [data.categories]);
-  const walletMap = useMemo(() => buildWalletLabelMap(data.wallets), [data.wallets]);
+  const catMap = useMemo(() => buildCategoryLabelMap(data.categories), [data.categories]);
+  const walMap = useMemo(() => buildWalletLabelMap(data.wallets), [data.wallets]);
 
-  const filteredTransactions = useMemo(() => {
-    return sortTransactionsDescending(data.transactions).filter((transaction) => {
-      if (transaction.deletedAt) return false;
-      if (typeFilter !== 'all' && transaction.type !== typeFilter) return false;
-      if (walletFilter !== 'all' && transaction.walletId !== walletFilter) return false;
-      if (categoryFilter !== 'all' && transaction.categoryId !== categoryFilter) return false;
-      return transactionMatchesSearch(transaction, search, walletMap, categoryMap);
+  const filtered = useMemo(() => {
+    return sortTransactionsDescending(data.transactions).filter((tx) => {
+      if (tx.deletedAt) return false;
+      if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+      if (walletFilter !== 'all' && tx.walletId !== walletFilter) return false;
+      if (categoryFilter !== 'all' && tx.categoryId !== categoryFilter) return false;
+      return transactionMatchesSearch(tx, search, walMap, catMap);
     });
-  }, [categoryFilter, categoryMap, data.transactions, search, typeFilter, walletFilter, walletMap]);
+  }, [categoryFilter, catMap, data.transactions, search, typeFilter, walletFilter, walMap]);
 
-  const grouped = useMemo(() => groupTransactionsByDay(filteredTransactions), [filteredTransactions]);
-  const income = filteredTransactions.filter((item) => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
-  const expense = filteredTransactions.filter((item) => item.type === 'expense').reduce((sum, item) => sum + item.amount, 0);
+  const grouped = useMemo(() => groupTransactionsByDay(filtered), [filtered]);
+  const income = filtered.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const expense = filtered.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await deleteTransaction(deleteTarget);
-    addToast({ title: 'Đã xóa giao dịch', tone: 'success' });
+    toast.success('Đã xóa giao dịch');
     setDeleteTarget(null);
   };
 
-  const typeFilters = [
-    { value: 'all' as const, label: 'Tất cả' },
-    { value: 'expense' as const, label: 'Chi tiêu' },
-    { value: 'income' as const, label: 'Thu nhập' },
-    { value: 'transfer' as const, label: 'Chuyển' },
+  const types = [
+    { v: 'all' as const, l: 'Tất cả' },
+    { v: 'expense' as const, l: 'Chi tiêu' },
+    { v: 'income' as const, l: 'Thu nhập' },
+    { v: 'transfer' as const, l: 'Chuyển' },
   ];
 
   return (
@@ -64,89 +67,64 @@ export function TransactionsPage() {
           <p className="section-copy">Tìm kiếm, lọc và quản lý tất cả giao dịch.</p>
         </div>
         <button type="button" className="primary-button" onClick={() => openTransactionSheet()}>
-          <IconGlyph name="plus" size="sm" /> Thêm
+          <Plus size={14} /> Thêm
         </button>
       </header>
 
       <section className="panel">
         <div className="toolbar-grid">
           <label className="search-field">
-            <IconGlyph name="search" />
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm ghi chú, ví, danh mục..." />
+            <Search size={18} />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm ghi chú, ví, danh mục..." />
           </label>
           <div className="chip-row">
-            {typeFilters.map((f) => (
-              <button
-                key={f.value}
-                type="button"
-                className={`chip-button${typeFilter === f.value ? ' chip-button--active' : ''}`}
-                onClick={() => setTypeFilter(f.value)}
-              >
-                {f.label}
-              </button>
+            {types.map((f) => (
+              <button key={f.v} type="button" className={`chip-button${typeFilter === f.v ? ' chip-button--active' : ''}`} onClick={() => setTypeFilter(f.v)}>{f.l}</button>
             ))}
           </div>
           <div className="filter-row">
-            <select value={walletFilter} onChange={(event) => setWalletFilter(event.target.value)}>
+            <select value={walletFilter} onChange={(e) => setWalletFilter(e.target.value)}>
               <option value="all">Tất cả ví</option>
-              {data.wallets.filter((wallet) => !wallet.isArchived).map((wallet) => (
-                <option key={wallet.id} value={wallet.id}>{wallet.name}</option>
-              ))}
+              {data.wallets.filter((w) => !w.isArchived).map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
             </select>
-            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
               <option value="all">Tất cả danh mục</option>
-              {data.categories.filter((category) => !category.isHidden).map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
+              {data.categories.filter((c) => !c.isHidden).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
         </div>
-
         <div className="summary-strip">
-          <div><span>Kết quả</span><strong>{filteredTransactions.length}</strong></div>
+          <div><span>Kết quả</span><strong>{filtered.length}</strong></div>
           <div><span>Thu nhập</span><strong>{formatCurrency(income, data.preferences.currency)}</strong></div>
           <div><span>Chi tiêu</span><strong>{formatCurrency(expense, data.preferences.currency)}</strong></div>
         </div>
       </section>
 
       {grouped.length > 0 ? (
-        <div className="stack-list">
-          {grouped.map((group) => (
-            <section key={group.date} className="panel panel--dense">
-              <div className="panel__header panel__header--compact">
-                <h2>{formatRelativeDate(group.date)}</h2>
-              </div>
+        <div className="stack-list" ref={listRef}>
+          {grouped.map((g) => (
+            <section key={g.date} className="panel panel--dense">
+              <div className="panel__header panel__header--compact"><h2>{formatRelativeDate(g.date)}</h2></div>
               <div className="stack-list">
-                {group.items.map((transaction, index) => {
-                  const category = transaction.categoryId ? categoryMap.get(transaction.categoryId) : undefined;
-                  const wallet = walletMap.get(transaction.walletId);
-                  const amountTone = transaction.type === 'income' ? 'positive' : transaction.type === 'expense' ? 'negative' : 'neutral';
+                {g.items.map((tx, i) => {
+                  const cat = tx.categoryId ? catMap.get(tx.categoryId) : undefined;
+                  const wal = walMap.get(tx.walletId);
+                  const tone = tx.type === 'income' ? 'positive' : tx.type === 'expense' ? 'negative' : 'neutral';
                   return (
-                    <motion.article
-                      key={transaction.id}
-                      className="transaction-row transaction-row--card"
-                      custom={index}
-                      initial="hidden"
-                      animate="show"
-                      variants={staggerItem}
-                    >
-                      <button type="button" className="transaction-row__main" onClick={() => openTransactionSheet(transaction)}>
-                        <div className="transaction-row__icon" style={{ background: category?.color ?? '#0d9488' }}>
-                          <IconGlyph name={category?.icon ?? (transaction.type === 'transfer' ? 'transfer' : 'wallet')} size="sm" />
+                    <motion.article key={tx.id} className="transaction-row transaction-row--card" custom={i} initial="hidden" animate="show" variants={stagger}>
+                      <button type="button" className="transaction-row__main" onClick={() => openTransactionSheet(tx)}>
+                        <div className="transaction-row__icon" style={{ background: cat?.color ?? '#0d9488' }}>
+                          <IconGlyph name={cat?.icon ?? (tx.type === 'transfer' ? 'transfer' : 'wallet')} size="sm" />
                         </div>
                         <div className="transaction-row__content">
-                          <strong>{category?.name ?? (transaction.type === 'transfer' ? 'Chuyển khoản' : 'Giao dịch')}</strong>
-                          <span>{wallet?.name ?? 'Ví không xác định'}{transaction.note ? ` · ${transaction.note}` : ''}</span>
+                          <strong>{cat?.name ?? (tx.type === 'transfer' ? 'Chuyển khoản' : 'Giao dịch')}</strong>
+                          <span>{wal?.name ?? 'Ví'}{tx.note ? ` · ${tx.note}` : ''}</span>
                         </div>
-                        <strong className={`amount amount--${amountTone}`}>{formatCurrency(transaction.amount, data.preferences.currency)}</strong>
+                        <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
                       </button>
                       <div className="inline-actions">
-                        <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...transaction, id: '' } as typeof transaction)} aria-label="Nhân bản">
-                          <IconGlyph name="copy" size="sm" />
-                        </button>
-                        <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(transaction.id)} aria-label="Xóa">
-                          <IconGlyph name="trash" size="sm" />
-                        </button>
+                        <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
+                        <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
                       </div>
                     </motion.article>
                   );
@@ -155,20 +133,9 @@ export function TransactionsPage() {
             </section>
           ))}
         </div>
-      ) : (
-        <EmptyState icon="list" title="Không tìm thấy giao dịch" description="Thử bỏ bộ lọc hoặc tạo giao dịch mới." action={<button type="button" className="primary-button" onClick={() => openTransactionSheet()}>Tạo giao dịch</button>} />
-      )}
+      ) : <EmptyState icon="list" title="Không tìm thấy giao dịch" description="Thử bỏ bộ lọc hoặc tạo giao dịch mới." action={<button type="button" className="primary-button" onClick={() => openTransactionSheet()}>Tạo giao dịch</button>} />}
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        title="Xóa giao dịch?"
-        description="Giao dịch này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?"
-        confirmLabel="Xóa"
-        cancelLabel="Hủy"
-        tone="danger"
-        onConfirm={() => void handleDelete()}
-        onCancel={() => setDeleteTarget(null)}
-      />
+      <ConfirmDialog open={!!deleteTarget} title="Xóa giao dịch?" description="Giao dịch này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?" confirmLabel="Xóa" cancelLabel="Hủy" tone="danger" onConfirm={() => void handleDelete()} onCancel={() => setDeleteTarget(null)} />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 ﻿import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { ToastViewport } from '../components/ui/ToastViewport';
 import { usePreferences } from '../hooks/useAppData';
 import { useBootstrap } from '../hooks/useBootstrap';
 import { resolveTheme } from '../domain/format';
@@ -15,6 +14,7 @@ import { TransactionSheet } from '../features/shared/TransactionSheet';
 import { WalletSheet } from '../features/shared/WalletSheet';
 import { CategorySheet } from '../features/shared/CategorySheet';
 import { BudgetSheet } from '../features/shared/BudgetSheet';
+import { Loader2 } from 'lucide-react';
 
 export function App() {
   const { ready, error } = useBootstrap();
@@ -28,9 +28,9 @@ export function App() {
     return (
       <div className="splash-screen">
         <div className="splash-card">
-          <p className="eyebrow">Local storage error</p>
-          <h1>We could not initialize KeepMyMoney.</h1>
-          <p>{error}</p>
+          <p className="eyebrow">Lỗi lưu trữ cục bộ</p>
+          <h1>Không thể khởi tạo KeepMyMoney.</h1>
+          <p className="section-copy">{error}</p>
         </div>
       </div>
     );
@@ -40,9 +40,12 @@ export function App() {
     return (
       <div className="splash-screen">
         <div className="splash-card">
+          <div className="splash-loader">
+            <Loader2 className="spin-icon" size={32} />
+          </div>
           <p className="eyebrow">KeepMyMoney</p>
-          <h1>Track clearly. Spend intentionally.</h1>
-          <p>Preparing your offline workspace...</p>
+          <h1>Ghi rõ ràng. Chi có kiểm soát.</h1>
+          <p className="section-copy">Đang chuẩn bị không gian làm việc offline…</p>
         </div>
       </div>
     );
@@ -68,7 +71,6 @@ export function App() {
       <WalletSheet />
       <CategorySheet />
       <BudgetSheet />
-      <ToastViewport />
     </>
   );
 }
