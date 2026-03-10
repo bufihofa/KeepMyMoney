@@ -131,7 +131,7 @@ export function InsightsPage() {
               <XAxis type="number" stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => val >= 1000000 ? `${(val/1000000).toFixed(0)}Tr` : val} />
               <YAxis type="category" dataKey="name" stroke="var(--text-dim)" width={86} fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip cursor={{ fill: 'rgba(148,163,184,0.06)' }} formatter={(value: number) => formatCurrency(value, data.preferences.currency)} contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} />
-              <Bar dataKey="value" name="Số dư" radius={[0, 8, 8, 0]} barSize={24} background={{ fill: 'rgba(148,163,184,0.08)', radius: [0, 8, 8, 0] }}>
+              <Bar dataKey="value" name="Số dư" radius={[0, 8, 8, 0]} barSize={24} background={{ fill: 'rgba(148,163,184,0.08)', radius: 8 }}>
                 {wallets.map((e) => <Cell key={e.name} fill={e.color} />)}
               </Bar>
             </BarChart>

@@ -11,18 +11,18 @@
   --bg-mesh: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.12), transparent 55%),
              radial-gradient(ellipse 60% 45% at 90% 0%, rgba(99,102,241,0.1), transparent 50%),
              radial-gradient(ellipse 70% 50% at 50% 100%, rgba(56,189,248,0.06), transparent 50%);
-  /* Glass surfaces */
-  --glass: rgba(255,255,255,0.55);
-  --glass-strong: rgba(255,255,255,0.72);
-  --glass-subtle: rgba(255,255,255,0.35);
-  --glass-tint: rgba(255,255,255,0.2);
-  --glass-blur: 20px;
-  --glass-blur-heavy: 40px;
+  /* Glass surfaces - Optimized for Android Webview */
+  --glass: rgba(255,255,255,0.70);
+  --glass-strong: rgba(255,255,255,0.85);
+  --glass-subtle: rgba(255,255,255,0.45);
+  --glass-tint: rgba(255,255,255,0.3);
+  --glass-blur: 8px; /* Reduced from 20px */
+  --glass-blur-heavy: 12px; /* Reduced from 40px */
   --glass-border: rgba(255,255,255,0.45);
   --glass-border-subtle: rgba(255,255,255,0.22);
   --glass-inner-glow: inset 0 1px 0 rgba(255,255,255,0.65);
   --surface-strong: #fff;
-  --surface-muted: rgba(241,245,249,0.65);
+  --surface-muted: rgba(241,245,249,0.8);
   /* Text */
   --text: hsl(222,47%,11%);
   --text-muted: hsl(215,16%,47%);
@@ -64,15 +64,15 @@ html[data-theme='dark'] {
   --bg: hsl(225,30%,6%);
   --bg-mesh: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16,185,129,0.08), transparent 55%),
              radial-gradient(ellipse 60% 45% at 90% 0%, rgba(99,102,241,0.06), transparent 50%);
-  --glass: rgba(22,30,50,0.5);
-  --glass-strong: rgba(22,30,50,0.7);
-  --glass-subtle: rgba(22,30,50,0.35);
-  --glass-tint: rgba(30,41,59,0.25);
-  --glass-border: rgba(148,163,184,0.1);
-  --glass-border-subtle: rgba(148,163,184,0.06);
+  --glass: rgba(30,41,59,0.7);
+  --glass-strong: rgba(22,30,50,0.85);
+  --glass-subtle: rgba(30,41,59,0.5);
+  --glass-tint: rgba(30,41,59,0.35);
+  --glass-border: rgba(148,163,184,0.15);
+  --glass-border-subtle: rgba(148,163,184,0.08);
   --glass-inner-glow: inset 0 1px 0 rgba(255,255,255,0.04);
-  --surface-strong: hsl(225,30%,9%);
-  --surface-muted: rgba(30,41,59,0.45);
+  --surface-strong: hsl(225,30%,12%);
+  --surface-muted: rgba(30,41,59,0.6);
   --text: hsl(210,40%,96%);
   --text-muted: hsl(215,20%,60%);
   --text-dim: hsl(215,16%,42%);
@@ -128,9 +128,10 @@ h3{font-size:0.95rem;font-weight:600}
 /* ── 6. App Shell ──────────────────────────────────────── */
 .app-shell{position:relative;min-height:100vh;min-height:100dvh}
 .app-shell__content{max-width:600px;margin:0 auto;padding:0.85rem 0.85rem calc(var(--nav-h) + var(--safe-b) + 1.5rem)}
-.app-shell__glow{position:fixed;border-radius:50%;filter:blur(100px);opacity:0.35;pointer-events:none;z-index:0;will-change:transform}
-.app-shell__glow--one{top:-12rem;left:-10rem;width:26rem;height:26rem;background:rgba(16,185,129,0.25)}
-.app-shell__glow--two{top:20%;right:-12rem;width:24rem;height:24rem;background:rgba(99,102,241,0.18)}
+/* Replaced filter:blur(100px) with radial gradients for performance */
+.app-shell__glow{position:fixed;border-radius:50%;opacity:0.35;pointer-events:none;z-index:0;will-change:transform}
+.app-shell__glow--one{top:-12rem;left:-10rem;width:26rem;height:26rem;background:radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%);}
+.app-shell__glow--two{top:20%;right:-12rem;width:24rem;height:24rem;background:radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);}
 
 /* ── 7. Nav Dock — Premium Notch Design ──────────────── */
 .nav-dock{position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -150,14 +151,18 @@ html[data-theme='dark'] .nav-dock__pill{
   filter:drop-shadow(0 12px 24px rgba(0,0,0,0.4));
 }
 
-/* Glass Background with Notch SVG Mask */
+/* Solid Background with Notch SVG Mask - Removed backdrop-filter to prevent severe Webview lag */
 .nav-dock__bg{
   position:absolute;inset:0;
   background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);
+  /* Removed backdrop-filter! */
   -webkit-mask-image:url("data:image/svg+xml,%3Csvg preserveAspectRatio='none' viewBox='0 0 400 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 0 H132 C145 0, 151 5, 159 20 C170 38, 184 48, 200 48 C216 48, 230 38, 241 20 C249 5, 255 0, 268 0 H376 A24 24 0 0 1 400 24 V40 A24 24 0 0 1 376 64 H24 A24 24 0 0 1 0 40 V24 A24 24 0 0 1 24 0 Z'/%3E%3C/svg%3E");
   mask-image:url("data:image/svg+xml,%3Csvg preserveAspectRatio='none' viewBox='0 0 400 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 0 H132 C145 0, 151 5, 159 20 C170 38, 184 48, 200 48 C216 48, 230 38, 241 20 C249 5, 255 0, 268 0 H376 A24 24 0 0 1 400 24 V40 A24 24 0 0 1 376 64 H24 A24 24 0 0 1 0 40 V24 A24 24 0 0 1 24 0 Z'/%3E%3C/svg%3E");
   -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+
+html[data-theme='dark'] .nav-dock__bg{
+  background:rgba(30,41,59,0.95);
 }
 
 .nav-dock__tabs{

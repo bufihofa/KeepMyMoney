@@ -5,9 +5,9 @@ import { useUIStore } from '../../stores/uiStore';
 
 const tabs = [
   { to: '/', icon: Home, end: true },
-  { to: '/transactions', icon: ArrowLeftRight },
-  { to: '/budgets', icon: PieChart },
-  { to: '/insights', icon: BarChart3 },
+  { to: '/transactions', icon: ArrowLeftRight, end: false },
+  { to: '/budgets', icon: PieChart, end: false },
+  { to: '/insights', icon: BarChart3, end: false },
 ] as const;
 
 export function AppShell() {
