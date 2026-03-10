@@ -4,6 +4,7 @@ interface IconGlyphProps {
   name: string;
   className?: string;
   style?: CSSProperties;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 function stroke(name: string) {
@@ -74,14 +75,56 @@ function stroke(name: string) {
       return <path d="M20 12 12 20 4 12V5h7z" />;
     case 'transfer':
       return <path d="M7 7h10M13 3l4 4-4 4M17 17H7M11 21l-4-4 4-4" />;
+    // New icons for v2
+    case 'chevronDown':
+      return <path d="M6 9l6 6 6-6" />;
+    case 'chevronRight':
+      return <path d="M9 6l6 6-6 6" />;
+    case 'check':
+      return <path d="M5 12l5 5L20 7" />;
+    case 'info':
+      return <><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></>;
+    case 'warning':
+      return <><path d="M12 3 2 21h20L12 3z" /><path d="M12 14v-4M12 17h.01" /></>;
+    case 'calendar':
+      return <path d="M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 8h16M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M8 4v2M16 4v2M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01" />;
+    case 'clock':
+      return <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></>;
+    case 'arrowUp':
+      return <path d="M12 19V5M5 12l7-7 7 7" />;
+    case 'arrowDown':
+      return <path d="M12 5v14M5 12l7 7 7-7" />;
+    case 'drag':
+      return <path d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01" />;
+    case 'shield':
+      return <path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" />;
+    case 'trendUp':
+      return <path d="M4 18l5-5 3 3 8-8M16 8h4v4" />;
+    case 'trendDown':
+      return <path d="M4 6l5 5 3-3 8 8M16 16h4v-4" />;
+    case 'percent':
+      return <><circle cx="8" cy="8" r="2" /><circle cx="16" cy="16" r="2" /><path d="M19 5 5 19" /></>;
     default:
       return <path d="M12 5v14M5 12h14" />;
   }
 }
 
-export function IconGlyph({ name, className, style }: IconGlyphProps) {
+const sizeMap = { sm: '0.9rem', md: '1.15rem', lg: '1.5rem' } as const;
+
+export function IconGlyph({ name, className, style, size = 'md' }: IconGlyphProps) {
+  const dimension = sizeMap[size];
   return (
-    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      style={{ width: dimension, height: dimension, ...style }}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {stroke(name)}
     </svg>
   );

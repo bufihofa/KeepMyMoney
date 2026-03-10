@@ -1,4 +1,5 @@
 ﻿import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { IconGlyph } from './IconGlyph';
 
 interface EmptyStateProps {
@@ -10,15 +11,20 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="empty-state">
+    <motion.div
+      className="empty-state"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div className="empty-state__icon">
-        <IconGlyph name={icon} />
+        <IconGlyph name={icon} size="lg" />
       </div>
       <div>
         <h3>{title}</h3>
         <p>{description}</p>
       </div>
       {action ? <div className="empty-state__action">{action}</div> : null}
-    </div>
+    </motion.div>
   );
 }

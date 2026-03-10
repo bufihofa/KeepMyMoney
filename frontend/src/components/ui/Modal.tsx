@@ -1,5 +1,5 @@
 ﻿import type { PropsWithChildren, ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
 import { IconGlyph } from './IconGlyph';
 
 interface ModalProps extends PropsWithChildren {
@@ -11,6 +11,12 @@ interface ModalProps extends PropsWithChildren {
 }
 
 export function Modal({ open, title, subtitle, onClose, children, footer }: ModalProps) {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y > 80 || info.velocity.y > 300) {
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
       {open ? (
@@ -22,13 +28,18 @@ export function Modal({ open, title, subtitle, onClose, children, footer }: Moda
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           />
           <motion.aside
             className="modal-sheet"
-            initial={{ opacity: 0, y: 32 }}
+            initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={handleDragEnd}
             role="dialog"
             aria-modal="true"
             aria-label={title}
@@ -38,8 +49,8 @@ export function Modal({ open, title, subtitle, onClose, children, footer }: Moda
                 <h3>{title}</h3>
                 {subtitle ? <p>{subtitle}</p> : null}
               </div>
-              <button type="button" className="icon-button" onClick={onClose} aria-label="Close dialog">
-                <IconGlyph name="close" />
+              <button type="button" className="icon-button icon-button--ghost" onClick={onClose} aria-label="Close dialog">
+                <IconGlyph name="close" size="sm" />
               </button>
             </header>
             <div className="modal-body">{children}</div>

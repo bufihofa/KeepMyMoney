@@ -1,9 +1,11 @@
 ﻿import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import { Modal } from '../../components/ui/Modal';
+import { IconGlyph } from '../../components/ui/IconGlyph';
 import { upsertTransaction } from '../../db/operations';
-import { fromDateTimeLocalValue, toDateTimeLocalValue } from '../../domain/format';
+import { formatCurrency, fromDateTimeLocalValue, toDateTimeLocalValue } from '../../domain/format';
 import type { TransactionRecord } from '../../domain/models';
 import { transactionSchema, type TransactionFormValues } from '../../domain/schemas';
 import { useAppData } from '../../hooks/useAppData';
@@ -48,6 +50,8 @@ export function TransactionSheet() {
 
   const transactionType = watch('type');
   const walletId = watch('walletId');
+  const categoryId = watch('categoryId');
+  const amount = watch('amount');
   const categoryOptions = data.categories.filter((category) => !category.isHidden && category.kind === (transactionType === 'income' ? 'income' : 'expense'));
 
   const onSubmit = handleSubmit(async (values) => {
@@ -62,95 +66,150 @@ export function TransactionSheet() {
       tagNames: values.tags.split(',').map((item) => item.trim()).filter(Boolean),
       occurredAt: fromDateTimeLocalValue(values.occurredAt),
     });
-
-    addToast({ title: transactionSheet.record?.id ? 'Transaction updated' : 'Transaction saved', tone: 'success' });
+    addToast({ title: transactionSheet.record?.id ? 'Đã cập nhật giao dịch' : 'Đã lưu giao dịch', tone: 'success' });
     closeTransactionSheet();
   });
+
+  const typeOptions = [
+    { value: 'expense' as const, label: 'Chi tiêu', icon: 'trendDown' },
+    { value: 'income' as const, label: 'Thu nhập', icon: 'trendUp' },
+    { value: 'transfer' as const, label: 'Chuyển', icon: 'transfer' },
+  ];
 
   return (
     <Modal
       open={transactionSheet.open}
       onClose={closeTransactionSheet}
-      title={transactionSheet.record?.id ? 'Edit transaction' : 'New transaction'}
-      subtitle="Capture expenses, income, or transfers without leaving your current context."
+      title={transactionSheet.record?.id ? 'Sửa giao dịch' : 'Giao dịch mới'}
+      subtitle="Ghi nhận chi tiêu, thu nhập hoặc chuyển khoản."
       footer={
         <>
-          <button type="button" className="soft-button" onClick={closeTransactionSheet}>Cancel</button>
-          <button type="submit" form="transaction-form" className="primary-button" disabled={isSubmitting}>Save transaction</button>
+          <button type="button" className="soft-button" onClick={closeTransactionSheet}>Hủy</button>
+          <button type="submit" form="transaction-form" className="primary-button" disabled={isSubmitting}>
+            <IconGlyph name="check" size="sm" /> Lưu
+          </button>
         </>
       }
     >
       <form id="transaction-form" className="sheet-form" onSubmit={onSubmit}>
+        {/* Type Selector */}
         <div className="segmented-control">
-          {(['expense', 'income', 'transfer'] as const).map((type) => (
+          {typeOptions.map((opt) => (
             <button
-              key={type}
+              key={opt.value}
               type="button"
-              className={`segmented-control__item${transactionType === type ? ' segmented-control__item--active' : ''}`}
-              onClick={() => setValue('type', type, { shouldValidate: true })}
+              className={`segmented-control__item${transactionType === opt.value ? ' segmented-control__item--active' : ''}`}
+              onClick={() => setValue('type', opt.value, { shouldValidate: true })}
             >
-              {type}
+              <IconGlyph name={opt.icon} size="sm" /> {opt.label}
             </button>
           ))}
         </div>
 
+        {/* Amount Display */}
+        <div className="amount-display">
+          <div className="amount-display__value">
+            {amount > 0 ? formatCurrency(amount, data.preferences.currency) : '₫0'}
+          </div>
+          <div className="amount-display__currency">{data.preferences.currency}</div>
+        </div>
+
         <label className="field">
-          <span>Amount</span>
+          <span>Số tiền</span>
           <input type="number" step="0.01" placeholder="0" {...register('amount')} />
           {errors.amount ? <small>{errors.amount.message}</small> : null}
         </label>
 
-        <div className="field-grid">
-          <label className="field">
-            <span>Wallet</span>
-            <select {...register('walletId')}>
-              <option value="">Choose wallet</option>
-              {wallets.map((wallet) => (
-                <option key={wallet.id} value={wallet.id}>{wallet.name}</option>
-              ))}
-            </select>
-            {errors.walletId ? <small>{errors.walletId.message}</small> : null}
-          </label>
-
-          {transactionType === 'transfer' ? (
-            <label className="field">
-              <span>Destination</span>
-              <select {...register('toWalletId')}>
-                <option value="">Choose wallet</option>
-                {wallets.filter((wallet) => wallet.id !== walletId).map((wallet) => (
-                  <option key={wallet.id} value={wallet.id}>{wallet.name}</option>
-                ))}
-              </select>
-              {errors.toWalletId ? <small>{errors.toWalletId.message}</small> : null}
-            </label>
-          ) : (
-            <label className="field">
-              <span>Category</span>
-              <select {...register('categoryId')}>
-                <option value="">Choose category</option>
-                {categoryOptions.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
-              {errors.categoryId ? <small>{errors.categoryId.message}</small> : null}
-            </label>
-          )}
+        {/* Wallet Picker */}
+        <div className="field">
+          <span>{transactionType === 'transfer' ? 'Ví nguồn' : 'Ví'}</span>
+          <div className="wallet-picker">
+            {wallets.map((wallet) => (
+              <button
+                key={wallet.id}
+                type="button"
+                className={`wallet-picker-item${walletId === wallet.id ? ' wallet-picker-item--selected' : ''}`}
+                onClick={() => setValue('walletId', wallet.id, { shouldValidate: true })}
+              >
+                <div className="wallet-picker-item__icon" style={{ background: wallet.color }}>
+                  <IconGlyph name={wallet.icon} size="sm" />
+                </div>
+                <div className="wallet-picker-item__info">
+                  <strong>{wallet.name}</strong>
+                  <span>{formatCurrency(wallet.currentBalanceCache, wallet.currency)}</span>
+                </div>
+                {walletId === wallet.id && <IconGlyph name="check" size="sm" style={{ color: 'var(--primary)' }} />}
+              </button>
+            ))}
+          </div>
+          {errors.walletId ? <small style={{ color: 'var(--danger)' }}>{errors.walletId.message}</small> : null}
         </div>
 
+        {/* Category Grid or Destination Wallet */}
+        {transactionType === 'transfer' ? (
+          <div className="field">
+            <span>Ví đích</span>
+            <div className="wallet-picker">
+              {wallets.filter((w) => w.id !== walletId).map((wallet) => {
+                const toWalletId = watch('toWalletId');
+                return (
+                  <button
+                    key={wallet.id}
+                    type="button"
+                    className={`wallet-picker-item${toWalletId === wallet.id ? ' wallet-picker-item--selected' : ''}`}
+                    onClick={() => setValue('toWalletId', wallet.id, { shouldValidate: true })}
+                  >
+                    <div className="wallet-picker-item__icon" style={{ background: wallet.color }}>
+                      <IconGlyph name={wallet.icon} size="sm" />
+                    </div>
+                    <div className="wallet-picker-item__info">
+                      <strong>{wallet.name}</strong>
+                      <span>{formatCurrency(wallet.currentBalanceCache, wallet.currency)}</span>
+                    </div>
+                    {toWalletId === wallet.id && <IconGlyph name="check" size="sm" style={{ color: 'var(--primary)' }} />}
+                  </button>
+                );
+              })}
+            </div>
+            {errors.toWalletId ? <small style={{ color: 'var(--danger)' }}>{errors.toWalletId.message}</small> : null}
+          </div>
+        ) : (
+          <div className="field">
+            <span>Danh mục</span>
+            <div className="category-grid">
+              {categoryOptions.map((category) => (
+                <motion.button
+                  key={category.id}
+                  type="button"
+                  className={`category-grid-item${categoryId === category.id ? ' category-grid-item--selected' : ''}`}
+                  onClick={() => setValue('categoryId', category.id, { shouldValidate: true })}
+                  whileTap={{ scale: 0.93 }}
+                >
+                  <div className="category-grid-item__icon" style={{ background: category.color }}>
+                    <IconGlyph name={category.icon} size="sm" />
+                  </div>
+                  {category.name}
+                </motion.button>
+              ))}
+            </div>
+            {errors.categoryId ? <small style={{ color: 'var(--danger)' }}>{errors.categoryId.message}</small> : null}
+          </div>
+        )}
+
         <label className="field">
-          <span>Date and time</span>
+          <span>Ngày giờ</span>
           <input type="datetime-local" {...register('occurredAt')} />
           {errors.occurredAt ? <small>{errors.occurredAt.message}</small> : null}
         </label>
 
         <label className="field">
-          <span>Tags</span>
-          <input type="text" placeholder="Essential, Work" {...register('tags')} />
+          <span>Thẻ</span>
+          <input type="text" placeholder="Thiết yếu, Công việc" {...register('tags')} />
         </label>
 
         <label className="field">
-          <span>Note</span>
-          <textarea rows={4} placeholder="What was this transaction for?" {...register('note')} />
+          <span>Ghi chú</span>
+          <textarea rows={3} placeholder="Giao dịch này dùng cho gì?" {...register('note')} />
         </label>
       </form>
     </Modal>

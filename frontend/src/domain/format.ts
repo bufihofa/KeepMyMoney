@@ -172,3 +172,19 @@ export function resolveTheme(mode: ThemeMode) {
 
   return mode;
 }
+
+export function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Chào buổi sáng ☀️';
+  if (hour < 18) return 'Chào buổi chiều 🌤️';
+  return 'Chào buổi tối 🌙';
+}
+
+export function formatRelativeDate(value: string) {
+  const target = value.slice(0, 10);
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const yesterday = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd');
+  if (target === today) return 'Hôm nay';
+  if (target === yesterday) return 'Hôm qua';
+  return formatDate(value, 'dd/MM/yyyy');
+}
