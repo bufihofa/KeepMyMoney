@@ -28,6 +28,54 @@ function fileToDataUrl(file: File) {
   });
 }
 
+function loadImage(dataUrl: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Không thể đọc ảnh đã chọn'));
+    img.src = dataUrl;
+  });
+}
+
+async function optimizeReceiptImage(dataUrl: string) {
+  const TARGET_BYTES = 1_400_000;
+  const MAX_DIMENSION = 1600;
+
+  const originalBytes = Math.floor((dataUrl.length * 3) / 4);
+  if (originalBytes <= TARGET_BYTES) {
+    return dataUrl;
+  }
+
+  const source = await loadImage(dataUrl);
+  const largestSide = Math.max(source.naturalWidth, source.naturalHeight) || 1;
+  const scale = Math.min(1, MAX_DIMENSION / largestSide);
+  const width = Math.max(1, Math.round(source.naturalWidth * scale));
+  const height = Math.max(1, Math.round(source.naturalHeight * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return dataUrl;
+  }
+
+  ctx.drawImage(source, 0, 0, width, height);
+
+  let best = canvas.toDataURL('image/jpeg', 0.82);
+  const qualities = [0.76, 0.7, 0.64, 0.58, 0.5];
+  for (const quality of qualities) {
+    const candidate = canvas.toDataURL('image/jpeg', quality);
+    best = candidate;
+    const bytes = Math.floor((candidate.length * 3) / 4);
+    if (bytes <= TARGET_BYTES) {
+      break;
+    }
+  }
+
+  return best;
+}
+
 export function ReceiptImportPage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const captureRef = useRef<HTMLInputElement | null>(null);
@@ -63,13 +111,15 @@ export function ReceiptImportPage() {
       }
 
       const photo = await Camera.getPhoto({
-        quality: 82,
+        quality: 75,
+        width: 1600,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
       });
 
       if (!photo.dataUrl) return;
-      setPreview(photo.dataUrl);
+      const optimized = await optimizeReceiptImage(photo.dataUrl);
+      setPreview(optimized);
     } catch {
       toast.error('Không thể mở camera');
     }
@@ -84,7 +134,8 @@ export function ReceiptImportPage() {
     if (!file) return;
 
     const dataUrl = await fileToDataUrl(file);
-    setPreview(dataUrl);
+    const optimized = await optimizeReceiptImage(dataUrl);
+    setPreview(optimized);
     event.target.value = '';
   }
 

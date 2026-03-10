@@ -69,17 +69,15 @@ export function BudgetsPage() {
         </div>
         <div className="metric-grid budgets-hero__metrics">
           <article className="metric-card budget-metric-card">
-            <span>Tổng ngân sách</span>
+            <span>Tổng</span>
             <strong>{formatCurrency(totalBudget, data.preferences.currency)}</strong>
-            <small>Hạn mức đã đặt</small>
           </article>
           <article className="metric-card metric-card--negative budget-metric-card">
-            <span>Đã chi</span>
+            <span>Phát sinh</span>
             <strong>{formatCurrency(totalSpent, data.preferences.currency)}</strong>
-            <small>Phát sinh hiện tại</small>
           </article>
           <article className={`metric-card budget-metric-card${remaining < 0 ? ' metric-card--negative' : ' metric-card--positive'}`}>
-            <span>Còn lại</span>
+            <span>Khả dụng</span>
             <strong>{formatCurrency(remaining, data.preferences.currency)}</strong>
             <small>{remaining < 0 ? 'Đã vượt hạn mức' : 'Số dư khả dụng'}</small>
           </article>

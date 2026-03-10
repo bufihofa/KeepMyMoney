@@ -3,17 +3,41 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Plus, Pencil, Archive, Download, Upload, Copy, Trash2, Zap } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { CURRENCY_OPTIONS } from '../../db/defaults';
 import { db, setPreferences } from '../../db/database';
 import { archiveWallet, clearLocalData, exportSnapshot, importSnapshot } from '../../db/operations';
 import { snapshotSchema } from '../../domain/schemas';
+import { toMonthKey } from '../../domain/format';
 import { copyText, impact } from '../../lib/device';
 import { getAISettings, setAISettings } from '../../lib/ai';
 import { useAppData } from '../../hooks/useAppData';
 import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
+
+type NumericIssue = {
+  table: 'wallets' | 'transactions' | 'budgets';
+  id: string;
+  field: string;
+  value: unknown;
+};
+
+type SymptomDebug = {
+  key: 'budget-usage' | 'month-expense' | 'home-total';
+  title: string;
+  uiText: string;
+  computedValue: unknown;
+  isFiniteValue: boolean;
+  formula: string;
+  steps: Array<{ name: string; value: unknown; finite?: boolean }>;
+  note: string;
+};
+
+function isFiniteNumber(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
 
 export function SettingsPage() {
   const data = useAppData();
@@ -25,6 +49,14 @@ export function SettingsPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [confirmAction, setConfirmAction] = useState<null | { type: 'archive'; walletId: string } | { type: 'clear' }>(null);
   const [ai, setAi] = useState(() => getAISettings());
+  const [isScanningNumericIssues, setIsScanningNumericIssues] = useState(false);
+  const [numericIssues, setNumericIssues] = useState<NumericIssue[]>([]);
+  const [symptomDebug, setSymptomDebug] = useState<SymptomDebug[]>([]);
+  const [scanAt, setScanAt] = useState('');
+  const buildId = import.meta.env.VITE_BUILD_ID || 'local-dev';
+  const buildTime = import.meta.env.VITE_BUILD_TIME || 'unknown';
+  const buildMode = import.meta.env.MODE;
+  const runtime = Capacitor.isNativePlatform() ? `native:${Capacitor.getPlatform()}` : 'web';
 
   const importPreview = useMemo(() => {
     if (!importJson.trim()) return null;
@@ -75,6 +107,154 @@ export function SettingsPage() {
   const handleSaveAI = () => {
     setAISettings(ai);
     toast.success('Đã lưu cấu hình AI');
+  };
+
+  const handleScanNumericIssues = async () => {
+    setIsScanningNumericIssues(true);
+    try {
+      const [wallets, transactions, budgets] = await Promise.all([
+        db.wallets.toArray(),
+        db.transactions.toArray(),
+        db.budgets.toArray(),
+      ]);
+
+      const issues: NumericIssue[] = [];
+
+      for (const wallet of wallets) {
+        if (!isFiniteNumber((wallet as { openingBalance: unknown }).openingBalance)) {
+          issues.push({ table: 'wallets', id: wallet.id, field: 'openingBalance', value: (wallet as { openingBalance: unknown }).openingBalance });
+        }
+        if (!isFiniteNumber((wallet as { currentBalanceCache: unknown }).currentBalanceCache)) {
+          issues.push({ table: 'wallets', id: wallet.id, field: 'currentBalanceCache', value: (wallet as { currentBalanceCache: unknown }).currentBalanceCache });
+        }
+      }
+
+      for (const transaction of transactions) {
+        if (!isFiniteNumber((transaction as { amount: unknown }).amount)) {
+          issues.push({ table: 'transactions', id: transaction.id, field: 'amount', value: (transaction as { amount: unknown }).amount });
+        }
+      }
+
+      for (const budget of budgets) {
+        if (!isFiniteNumber((budget as { limitAmount: unknown }).limitAmount)) {
+          issues.push({ table: 'budgets', id: budget.id, field: 'limitAmount', value: (budget as { limitAmount: unknown }).limitAmount });
+        }
+
+        const thresholds = (budget as { alertThresholds?: unknown }).alertThresholds;
+        if (!Array.isArray(thresholds)) {
+          issues.push({ table: 'budgets', id: budget.id, field: 'alertThresholds', value: thresholds });
+          continue;
+        }
+
+        for (let i = 0; i < thresholds.length; i += 1) {
+          if (!isFiniteNumber(thresholds[i])) {
+            issues.push({ table: 'budgets', id: budget.id, field: `alertThresholds[${i}]`, value: thresholds[i] });
+          }
+        }
+      }
+
+      const monthKey = toMonthKey();
+      const activeWallets = wallets.filter((wallet) => !wallet.isArchived);
+      const activeTransactions = transactions.filter((transaction) => !transaction.deletedAt);
+      const monthTransactions = activeTransactions.filter((transaction) => transaction.occurredAt.startsWith(monthKey));
+      const monthExpenseTransactions = monthTransactions.filter((transaction) => transaction.type === 'expense');
+      const monthBudgets = budgets.filter((budget) => budget.periodKey === monthKey);
+
+      let homeTotalRaw: unknown = 0;
+      for (const wallet of activeWallets) {
+        const balance = Number((wallet as { currentBalanceCache: unknown }).currentBalanceCache);
+        homeTotalRaw = (homeTotalRaw as number) + balance;
+      }
+
+      let monthExpenseRaw: unknown = 0;
+      for (const transaction of monthExpenseTransactions) {
+        const amount = Number((transaction as { amount: unknown }).amount);
+        monthExpenseRaw = (monthExpenseRaw as number) + amount;
+      }
+
+      let totalSpentRaw: unknown = 0;
+      let totalBudgetRaw: unknown = 0;
+      for (const budget of monthBudgets) {
+        const budgetSpentForCategory = monthExpenseTransactions
+          .filter((transaction) => transaction.categoryId === budget.categoryId)
+          .reduce((sum, transaction) => sum + Number((transaction as { amount: unknown }).amount), 0);
+
+        totalSpentRaw = (totalSpentRaw as number) + budgetSpentForCategory;
+        totalBudgetRaw = (totalBudgetRaw as number) + Number((budget as { limitAmount: unknown }).limitAmount);
+      }
+
+      let budgetUsageRaw: unknown = 0;
+      if (typeof totalBudgetRaw === 'number' && totalBudgetRaw > 0) {
+        budgetUsageRaw = (totalSpentRaw as number) / totalBudgetRaw;
+      }
+
+      const symptomChecks: SymptomDebug[] = [
+        {
+          key: 'budget-usage',
+          title: 'Đã dùng NaN% ngân sách',
+          uiText: 'BudgetsPage > CountUp(Math.round(usage * 100))',
+          computedValue: budgetUsageRaw,
+          isFiniteValue: isFiniteNumber(budgetUsageRaw),
+          formula: 'usage = totalSpent / totalBudget',
+          steps: [
+            { name: 'monthKey', value: monthKey },
+            { name: 'monthBudgets.length', value: monthBudgets.length, finite: true },
+            { name: 'monthExpenseTransactions.length', value: monthExpenseTransactions.length, finite: true },
+            { name: 'totalSpentRaw', value: totalSpentRaw, finite: isFiniteNumber(totalSpentRaw) },
+            { name: 'totalBudgetRaw', value: totalBudgetRaw, finite: isFiniteNumber(totalBudgetRaw) },
+            { name: 'usageRaw', value: budgetUsageRaw, finite: isFiniteNumber(budgetUsageRaw) },
+          ],
+          note: isFiniteNumber(budgetUsageRaw)
+            ? 'Công thức ngân sách hiện trả về số hữu hạn.'
+            : 'NaN xuất hiện trong công thức usage; kiểm tra limitAmount hoặc spent theo danh mục/tháng.',
+        },
+        {
+          key: 'month-expense',
+          title: 'Chi tiêu NaN tháng này',
+          uiText: 'HomePage > CountUp(summary.expense)',
+          computedValue: monthExpenseRaw,
+          isFiniteValue: isFiniteNumber(monthExpenseRaw),
+          formula: 'summary.expense = Σ(transaction.amount) với type=expense',
+          steps: [
+            { name: 'monthKey', value: monthKey },
+            { name: 'monthExpenseTransactions.length', value: monthExpenseTransactions.length, finite: true },
+            { name: 'monthExpenseRaw', value: monthExpenseRaw, finite: isFiniteNumber(monthExpenseRaw) },
+          ],
+          note: isFiniteNumber(monthExpenseRaw)
+            ? 'Tổng chi tiêu tháng hiện ra số hữu hạn.'
+            : 'NaN xuất hiện khi cộng transaction.amount trong tháng.',
+        },
+        {
+          key: 'home-total',
+          title: 'Chào buổi sáng NaN',
+          uiText: 'HomePage > CountUp(total) dưới dòng greeting',
+          computedValue: homeTotalRaw,
+          isFiniteValue: isFiniteNumber(homeTotalRaw),
+          formula: 'total = Σ(activeWallet.currentBalanceCache)',
+          steps: [
+            { name: 'activeWallets.length', value: activeWallets.length, finite: true },
+            { name: 'homeTotalRaw', value: homeTotalRaw, finite: isFiniteNumber(homeTotalRaw) },
+          ],
+          note: isFiniteNumber(homeTotalRaw)
+            ? 'Tổng số dư ví hiện là số hữu hạn.'
+            : 'NaN xuất hiện khi cộng currentBalanceCache của ví hoạt động.',
+        },
+      ];
+
+      setNumericIssues(issues);
+      setSymptomDebug(symptomChecks);
+      setScanAt(new Date().toISOString());
+      const symptomBadCount = symptomChecks.filter((item) => !item.isFiniteValue).length;
+      if (issues.length === 0 && symptomBadCount === 0) {
+        toast.success('Không phát hiện số liệu lỗi và công thức NaN đều ổn');
+      } else {
+        toast.success(`Phát hiện ${issues.length} lỗi dữ liệu, ${symptomBadCount} công thức nghi vấn`);
+      }
+    } catch (err) {
+      toast.error('Quét dữ liệu thất bại', { description: err instanceof Error ? err.message : 'Lỗi không xác định' });
+    } finally {
+      setIsScanningNumericIssues(false);
+    }
   };
 
   return (
@@ -180,9 +360,47 @@ export function SettingsPage() {
       <motion.section className="panel panel--dense" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.25 }}>
         <div className="panel__header panel__header--compact"><h2>Chẩn đoán</h2></div>
         <div className="setting-row">
+          <div>
+            <strong>Bundle fingerprint</strong>
+            <span>{buildId.slice(0, 12)} · {buildTime} · {buildMode} · {runtime}</span>
+          </div>
+          <button type="button" className="icon-button icon-button--ghost" onClick={() => void copyText(`${buildId}|${buildTime}|${buildMode}|${runtime}`)} aria-label="Sao chép fingerprint"><Copy size={14} /></button>
+        </div>
+        <div className="setting-row">
           <div><strong>Bản ghi IndexedDB</strong><span>{data.transactions.length} giao dịch · {data.wallets.length} ví · {data.categories.length} danh mục</span></div>
           <button type="button" className="icon-button icon-button--ghost" onClick={() => void db.open()} aria-label="Kết nối DB"><Zap size={14} /></button>
         </div>
+        <div className="inline-actions" style={{ marginTop: '0.65rem' }}>
+          <button type="button" className="soft-button" onClick={() => void handleScanNumericIssues()} disabled={isScanningNumericIssues}>
+            <Zap size={14} /> {isScanningNumericIssues ? 'Đang quét...' : 'Quét số liệu bất thường'}
+          </button>
+        </div>
+        {scanAt && (
+          <div className={`preview-card${numericIssues.length > 0 ? ' preview-card--danger' : ''}`} style={{ marginTop: '0.75rem' }}>
+            <strong>{numericIssues.length > 0 ? `Phát hiện ${numericIssues.length} lỗi số liệu` : 'Không phát hiện số liệu lỗi'}</strong>
+            <small>Quét lúc {scanAt}</small>
+            {numericIssues.length > 0 && (
+              <textarea
+                rows={6}
+                readOnly
+                value={JSON.stringify(numericIssues.slice(0, 20), null, 2)}
+                style={{ marginTop: '0.55rem' }}
+              />
+            )}
+          </div>
+        )}
+        {scanAt && symptomDebug.length > 0 && (
+          <div className={`preview-card${symptomDebug.some((item) => !item.isFiniteValue) ? ' preview-card--danger' : ''}`} style={{ marginTop: '0.75rem' }}>
+            <strong>Debug công thức 3 triệu chứng NaN</strong>
+            <small>Quét lúc {scanAt}</small>
+            <textarea
+              rows={10}
+              readOnly
+              value={JSON.stringify(symptomDebug, null, 2)}
+              style={{ marginTop: '0.55rem' }}
+            />
+          </div>
+        )}
       </motion.section>
 
       {data.wallets.length === 0 && <EmptyState icon="wallet" title="Chưa cấu hình ví" description="Thêm ví để bắt đầu ghi giao dịch." action={<button type="button" className="primary-button" onClick={() => openWalletSheet()}>Thêm ví</button>} />}

@@ -63,6 +63,58 @@ function extractAssistantText(json: unknown): string {
     .trim();
 }
 
+function readErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const record = payload as Record<string, unknown>;
+
+  if (typeof record.message === 'string' && record.message.trim()) {
+    return record.message.trim();
+  }
+
+  const error = record.error;
+  if (typeof error === 'string' && error.trim()) {
+    return error.trim();
+  }
+
+  if (error && typeof error === 'object') {
+    const nested = error as Record<string, unknown>;
+    if (typeof nested.message === 'string' && nested.message.trim()) {
+      return nested.message.trim();
+    }
+    if (typeof nested.error === 'string' && nested.error.trim()) {
+      return nested.error.trim();
+    }
+  }
+
+  return null;
+}
+
+async function readResponsePayload(res: Response): Promise<{ json: unknown | null; text: string }> {
+  const contentType = (res.headers.get('content-type') ?? '').toLowerCase();
+
+  if (contentType.includes('application/json')) {
+    try {
+      const json = (await res.json()) as unknown;
+      return { json, text: '' };
+    } catch {
+      const text = await res.text();
+      return { json: null, text };
+    }
+  }
+
+  const text = await res.text();
+  if (!text.trim()) {
+    return { json: null, text: '' };
+  }
+
+  try {
+    const json = JSON.parse(text) as unknown;
+    return { json, text };
+  } catch {
+    return { json: null, text };
+  }
+}
+
 function stripCodeFence(text: string) {
   return text.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
 }
@@ -268,9 +320,17 @@ export async function extractReceiptItemsWithLLM(input: {
     body: JSON.stringify(payload),
   });
 
-  const json = (await res.json()) as unknown;
+  const { json, text } = await readResponsePayload(res);
   if (!res.ok) {
-    throw new Error(JSON.stringify(json));
+    const message =
+      readErrorMessage(json) ||
+      (text.trim() ? text.trim() : '') ||
+      `AI request failed (${res.status})`;
+    throw new Error(message);
+  }
+
+  if (!json) {
+    throw new Error('AI server did not return JSON response.');
   }
 
   const rawText = extractAssistantText(json);
