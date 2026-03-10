@@ -1,6 +1,6 @@
-﻿import { useRef } from 'react';
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Pie, PieChart, ResponsiveContainer, Cell } from 'recharts';
+import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { Link } from 'react-router-dom';
 import CountUp from 'react-countup';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
@@ -131,11 +131,27 @@ export function HomePage() {
           </div>
           {cats.length > 0 ? (
             <div className="chart-card">
-              <div className="donut-wrap">
-                <ResponsiveContainer width="100%" height={170}>
-                  <PieChart><Pie data={cats} dataKey="total" innerRadius={48} outerRadius={72} paddingAngle={3}>
-                    {cats.map((e) => <Cell key={e.categoryId} fill={e.color} />)}
-                  </Pie></PieChart>
+              <div className="donut-wrap" style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', top: '-10px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Top {cats.length}</span>
+                  <strong style={{ fontSize: '1.25rem' }}>{formatCompactCurrency(cats.reduce((s, c) => s + c.total, 0), data.preferences.currency)}</strong>
+                </div>
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <defs>
+                      <filter id="pieShadowDeeper" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="8" stdDeviation="15" floodColor="#000" floodOpacity="0.12" />
+                      </filter>
+                    </defs>
+                    <Tooltip 
+                      formatter={(value: number) => formatCurrency(value, data.preferences.currency)} 
+                      contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} 
+                      itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} 
+                    />
+                    <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={6} stroke="none" filter="url(#pieShadowDeeper)">
+                      {cats.map((e) => <Cell key={e.categoryId} fill={e.color} />)}
+                    </Pie>
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
               <div className="legend-list">

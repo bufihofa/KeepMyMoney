@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { toast } from 'sonner';
@@ -24,6 +24,8 @@ export function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'expense' | 'income' | 'transfer'>('all');
   const [walletFilter, setWalletFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [listRef] = useAutoAnimate();
 
@@ -36,9 +38,24 @@ export function TransactionsPage() {
       if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
       if (walletFilter !== 'all' && tx.walletId !== walletFilter) return false;
       if (categoryFilter !== 'all' && tx.categoryId !== categoryFilter) return false;
+      
+      if (fromDate || toDate) {
+        const txDate = new Date(tx.occurredAt);
+        if (fromDate) {
+          const start = new Date(fromDate);
+          start.setHours(0, 0, 0, 0);
+          if (txDate < start) return false;
+        }
+        if (toDate) {
+          const end = new Date(toDate);
+          end.setHours(23, 59, 59, 999);
+          if (txDate > end) return false;
+        }
+      }
+
       return transactionMatchesSearch(tx, search, walMap, catMap);
     });
-  }, [categoryFilter, catMap, data.transactions, search, typeFilter, walletFilter, walMap]);
+  }, [categoryFilter, catMap, data.transactions, search, typeFilter, walletFilter, walMap, fromDate, toDate]);
 
   const grouped = useMemo(() => groupTransactionsByDay(filtered), [filtered]);
   const income = filtered.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -83,14 +100,16 @@ export function TransactionsPage() {
             ))}
           </div>
           <div className="filter-row">
-            <select value={walletFilter} onChange={(e) => setWalletFilter(e.target.value)}>
+            <select value={walletFilter} onChange={(e) => setWalletFilter(e.target.value)} style={{ flex: 1, minWidth: '140px' }}>
               <option value="all">Tất cả ví</option>
               {data.wallets.filter((w) => !w.isArchived).map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
             </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ flex: 1, minWidth: '140px' }}>
               <option value="all">Tất cả danh mục</option>
               {data.categories.filter((c) => !c.isHidden).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
+            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} title="Từ ngày" style={{ flex: 1, minWidth: '140px' }} />
+            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} title="Đến ngày" style={{ flex: 1, minWidth: '140px' }} />
           </div>
         </div>
         <div className="summary-strip">

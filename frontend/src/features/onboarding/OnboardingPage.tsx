@@ -1,4 +1,4 @@
-﻿import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -18,7 +18,7 @@ export function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingSchema),
-    defaultValues: { currency: 'VND', weekStart: 'monday', walletName: 'Ví chính', openingBalance: 3500000, useSampleData: true },
+    defaultValues: { currency: 'VND', weekStart: 'monday', walletName: '', openingBalance: 0, useSampleData: false },
   });
 
   const onSubmit = handleSubmit(async (values) => {

@@ -1,4 +1,4 @@
-﻿import {
+import {
   endOfMonth,
   endOfQuarter,
   endOfWeek,
@@ -72,32 +72,32 @@ export function getDateRange(preset: PeriodPreset, weekStart: WeekStart, now = n
       return {
         start: startOfWeek(now, { weekStartsOn }),
         end: endOfWeek(now, { weekStartsOn }),
-        label: 'This week',
+        label: 'Tuần này',
       };
     case 'month':
       return {
         start: startOfMonth(now),
         end: endOfMonth(now),
-        label: 'This month',
+        label: 'Tháng này',
       };
     case 'quarter':
       return {
         start: startOfQuarter(now),
         end: endOfQuarter(now),
-        label: 'This quarter',
+        label: 'Quý này',
       };
     case 'year':
       return {
         start: startOfYear(now),
         end: endOfYear(now),
-        label: 'This year',
+        label: 'Năm nay',
       };
     case 'all':
     default:
       return {
         start: null,
         end: null,
-        label: 'All time',
+        label: 'Tất cả',
       };
   }
 }
@@ -111,7 +111,7 @@ export function getPreviousDateRange(preset: PeriodPreset, weekStart: WeekStart,
       return {
         start: startOfWeek(value, { weekStartsOn }),
         end: endOfWeek(value, { weekStartsOn }),
-        label: 'Last week',
+        label: 'Tuần trước',
       };
     }
     case 'month': {
@@ -119,7 +119,7 @@ export function getPreviousDateRange(preset: PeriodPreset, weekStart: WeekStart,
       return {
         start: startOfMonth(value),
         end: endOfMonth(value),
-        label: 'Last month',
+        label: 'Tháng trước',
       };
     }
     case 'quarter': {
@@ -127,7 +127,7 @@ export function getPreviousDateRange(preset: PeriodPreset, weekStart: WeekStart,
       return {
         start: startOfQuarter(value),
         end: endOfQuarter(value),
-        label: 'Last quarter',
+        label: 'Quý trước',
       };
     }
     case 'year': {
@@ -135,7 +135,7 @@ export function getPreviousDateRange(preset: PeriodPreset, weekStart: WeekStart,
       return {
         start: startOfYear(value),
         end: endOfYear(value),
-        label: 'Last year',
+        label: 'Năm trước',
       };
     }
     case 'all':
@@ -143,7 +143,7 @@ export function getPreviousDateRange(preset: PeriodPreset, weekStart: WeekStart,
       return {
         start: null,
         end: null,
-        label: 'Previous period',
+        label: 'Kỳ trước',
       };
   }
 }
