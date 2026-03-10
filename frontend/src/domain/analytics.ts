@@ -123,10 +123,10 @@ export function buildDailyCashflow(transactions: TransactionRecord[], range: Dat
       const key = transaction.occurredAt.slice(0, 10);
       const point = grouped.get(key) ?? { label: key.slice(5), income: 0, expense: 0, net: 0 };
       if (transaction.type === 'income') {
-        point.income += transaction.amount;
+        point.income += toFiniteNumber(transaction.amount);
       }
       if (transaction.type === 'expense') {
-        point.expense += transaction.amount;
+        point.expense += toFiniteNumber(transaction.amount);
       }
       point.net = point.income - point.expense;
       grouped.set(key, point);
@@ -143,10 +143,10 @@ export function buildDailyCashflow(transactions: TransactionRecord[], range: Dat
     const dayTransactions = transactions.filter((transaction) => !transaction.deletedAt && transaction.occurredAt.startsWith(dateKey));
     const income = dayTransactions
       .filter((transaction) => transaction.type === 'income')
-      .reduce((sum, transaction) => sum + transaction.amount, 0);
+      .reduce((sum, transaction) => sum + toFiniteNumber(transaction.amount), 0);
     const expense = dayTransactions
       .filter((transaction) => transaction.type === 'expense')
-      .reduce((sum, transaction) => sum + transaction.amount, 0);
+      .reduce((sum, transaction) => sum + toFiniteNumber(transaction.amount), 0);
 
     return {
       label: format(day, 'dd MMM'),
@@ -181,7 +181,7 @@ export function buildWalletDistribution(wallets: WalletRecord[]) {
 }
 
 export function findLargestTransaction(transactions: TransactionRecord[]) {
-  return [...getActiveTransactions(transactions)].sort((left, right) => right.amount - left.amount)[0];
+  return [...getActiveTransactions(transactions)].sort((left, right) => toFiniteNumber(right.amount) - toFiniteNumber(left.amount))[0];
 }
 
 export function transactionMatchesSearch(

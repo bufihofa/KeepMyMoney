@@ -36,6 +36,11 @@ const walletTypeLabel: Record<string, string> = {
   other: 'Khác',
 };
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export function HomePage() {
   const data = useAppData();
   const periodPreset = useUIStore((s) => s.periodPreset);
@@ -55,7 +60,12 @@ export function HomePage() {
   const catMap = useMemo(() => buildCategoryLabelMap(data.categories), [data.categories]);
   const walMap = useMemo(() => buildWalletLabelMap(data.wallets), [data.wallets]);
   const activeWallets = useMemo(() => data.wallets.filter((w) => !w.isArchived), [data.wallets]);
-  const total = useMemo(() => activeWallets.reduce((s, w) => s + w.currentBalanceCache, 0), [activeWallets]);
+  const total = useMemo(() => toFiniteNumber(activeWallets.reduce((s, w) => s + toFiniteNumber(w.currentBalanceCache), 0)), [activeWallets]);
+  const safeSummary = useMemo(() => ({
+    income: toFiniteNumber(summary.income),
+    expense: toFiniteNumber(summary.expense),
+    net: toFiniteNumber(summary.net),
+  }), [summary.income, summary.expense, summary.net]);
 
   return (
     <div className="page page--home">
@@ -64,7 +74,7 @@ export function HomePage() {
         <div>
           <p className="eyebrow">{getGreeting()}</p>
           <h1>
-            <CountUp end={total} separator="." prefix={data.preferences.currency === 'VND' ? '₫' : '$'} duration={reduceMotion ? 0 : 1.2} preserveValue />
+            <CountUp key={`home-total-${total}`} end={total} separator="." prefix={data.preferences.currency === 'VND' ? '₫' : '$'} duration={reduceMotion ? 0 : 1.2} preserveValue={false} />
           </h1>
           <p className="section-copy">Bạn đang quản lý {activeWallets.length} ví hoạt động</p>
         </div>
@@ -119,17 +129,17 @@ export function HomePage() {
         <div className="metric-grid">
           <article className="metric-card metric-card--positive">
             <span><TrendingUp size={13} /> Thu nhập</span>
-            <strong><CountUp end={summary.income} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
+            <strong><CountUp key={`home-income-${safeSummary.income}`} end={safeSummary.income} duration={reduceMotion ? 0 : 0.8} preserveValue={false} formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.incomeChange)} so với kỳ trước</small>
           </article>
           <article className="metric-card metric-card--negative">
             <span><TrendingDown size={13} /> Chi tiêu</span>
-            <strong><CountUp end={summary.expense} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
+            <strong><CountUp key={`home-expense-${safeSummary.expense}`} end={safeSummary.expense} duration={reduceMotion ? 0 : 0.8} preserveValue={false} formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.expenseChange)} so với kỳ trước</small>
           </article>
           <article className="metric-card metric-card--net">
             <span><Activity size={13} /> Ròng</span>
-            <strong><CountUp end={summary.net} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
+            <strong><CountUp key={`home-net-${safeSummary.net}`} end={safeSummary.net} duration={reduceMotion ? 0 : 0.8} preserveValue={false} formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.netChange)} so với kỳ trước</small>
           </article>
         </div>

@@ -29,6 +29,7 @@ export function BudgetsPage() {
   const totalSpent = useMemo(() => toFiniteNumber(progress.reduce((s, i) => s + toFiniteNumber(i.spent), 0)), [progress]);
   const totalProjected = useMemo(() => toFiniteNumber(progress.reduce((s, i) => s + toFiniteNumber(i.projected), 0)), [progress]);
   const usage = totalBudget > 0 ? toFiniteNumber(totalSpent / totalBudget) : 0;
+  const usagePercent = Number.isFinite(usage) ? Math.round(usage * 100) : 0;
   const remaining = totalBudget - totalSpent;
   const clampedUsage = Math.max(0, Math.min(usage, 1));
   const statusLabel: Record<string, string> = { safe: 'An toàn', watch: 'Cẩn thận', danger: 'Nguy hiểm', over: 'Vượt ngưỡng' };
@@ -55,7 +56,7 @@ export function BudgetsPage() {
           </span>
         </div>
         <div className="budgets-hero__kpi">
-          <h2>Đã dùng <CountUp end={Math.round(usage * 100)} duration={reduceMotion ? 0 : 0.8} preserveValue />% ngân sách</h2>
+          <h2>Đã dùng <CountUp key={`budget-usage-${usagePercent}`} end={usagePercent} duration={reduceMotion ? 0 : 0.8} preserveValue={false} />% ngân sách</h2>
           <p className="budgets-hero__subcopy">Đã chi {formatCurrency(totalSpent, data.preferences.currency)} trên tổng {formatCurrency(totalBudget, data.preferences.currency)}</p>
         </div>
         <div className="progress-bar progress-bar--large">

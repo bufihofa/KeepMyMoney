@@ -26,17 +26,26 @@ const defaultTooltipItemStyle = {
   fontSize: '13px',
 };
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 function axisCurrencyTick(val: number) {
-  if (val >= 1_000_000_000) {
-    return `${(val / 1_000_000_000).toFixed(1)}Ty`;
+  const safeVal = toFiniteNumber(val);
+  if (!Number.isFinite(safeVal)) {
+    return '0';
   }
-  if (val >= 1_000_000) {
-    return `${(val / 1_000_000).toFixed(0)}Tr`;
+  if (safeVal >= 1_000_000_000) {
+    return `${(safeVal / 1_000_000_000).toFixed(1)}Ty`;
   }
-  if (val >= 1_000) {
-    return `${Math.round(val / 1_000)}K`;
+  if (safeVal >= 1_000_000) {
+    return `${(safeVal / 1_000_000).toFixed(0)}Tr`;
   }
-  return `${val}`;
+  if (safeVal >= 1_000) {
+    return `${Math.round(safeVal / 1_000)}K`;
+  }
+  return `${safeVal}`;
 }
 
 function buildAccumulatedNet(
@@ -44,10 +53,10 @@ function buildAccumulatedNet(
 ) {
   let running = 0;
   return points.map((point) => {
-    running += point.net;
+    running += toFiniteNumber(point.net);
     return {
       label: point.label,
-      net: point.net,
+      net: toFiniteNumber(point.net),
       accumulated: running,
     };
   });
@@ -77,10 +86,10 @@ function buildMonthlyIncomeExpense(
       continue;
     }
     if (transaction.type === 'income') {
-      bucket.income += transaction.amount;
+      bucket.income += toFiniteNumber(transaction.amount);
     }
     if (transaction.type === 'expense') {
-      bucket.expense += transaction.amount;
+      bucket.expense += toFiniteNumber(transaction.amount);
     }
   }
 
@@ -106,7 +115,7 @@ function buildWeekdaySpend(
       continue;
     }
     const dayIndex = parseISO(transaction.occurredAt).getDay();
-    totals[dayIndex] += transaction.amount;
+    totals[dayIndex] += toFiniteNumber(transaction.amount);
   }
 
   return labels.map((label, index) => ({ label, expense: totals[index] }));
@@ -116,10 +125,10 @@ function buildExpenseMovingAverage(points: Array<{ label: string; expense: numbe
   return points.map((point, index) => {
     const from = Math.max(0, index - 6);
     const window = points.slice(from, index + 1);
-    const average = window.length === 0 ? 0 : window.reduce((sum, item) => sum + item.expense, 0) / window.length;
+    const average = window.length === 0 ? 0 : window.reduce((sum, item) => sum + toFiniteNumber(item.expense), 0) / window.length;
     return {
       label: point.label,
-      expense: point.expense,
+      expense: toFiniteNumber(point.expense),
       avg7: average,
     };
   });
@@ -130,10 +139,10 @@ function buildCategoryPareto(cats: Array<{ name: string; total: number }>) {
   const total = top.reduce((sum, item) => sum + item.total, 0);
   let cumulative = 0;
   return top.map((item) => {
-    cumulative += item.total;
+    cumulative += toFiniteNumber(item.total);
     return {
       name: item.name,
-      total: item.total,
+      total: toFiniteNumber(item.total),
       cumulativePct: total === 0 ? 0 : (cumulative / total) * 100,
     };
   });
@@ -143,14 +152,14 @@ function buildTopExpenseTransactions(transactions: TransactionRecord[], categori
   const categoryMap = new Map(categories.map((item) => [item.id, item.name]));
   return transactions
     .filter((transaction) => transaction.type === 'expense' && !transaction.deletedAt)
-    .sort((left, right) => right.amount - left.amount)
+    .sort((left, right) => toFiniteNumber(right.amount) - toFiniteNumber(left.amount))
     .slice(0, 8)
     .map((transaction) => {
       const categoryLabel = transaction.categoryId ? categoryMap.get(transaction.categoryId) ?? 'Khác' : 'Không danh mục';
       const dateLabel = format(parseISO(transaction.occurredAt), 'dd/MM');
       return {
         label: `${categoryLabel} ${dateLabel}`,
-        amount: transaction.amount,
+        amount: toFiniteNumber(transaction.amount),
       };
     });
 }
@@ -169,8 +178,8 @@ function buildExpenseAmountBuckets(transactions: TransactionRecord[]) {
       (transaction) =>
         transaction.type === 'expense' &&
         !transaction.deletedAt &&
-        transaction.amount >= bucket.min &&
-        transaction.amount < bucket.max,
+        toFiniteNumber(transaction.amount) >= bucket.min &&
+        toFiniteNumber(transaction.amount) < bucket.max,
     ).length;
     return {
       label: bucket.label,
@@ -202,10 +211,10 @@ function buildMonthlyRunRate(transactions: TransactionRecord[], monthCount = 12)
       continue;
     }
     if (transaction.type === 'income') {
-      item.income += transaction.amount;
+      item.income += toFiniteNumber(transaction.amount);
     }
     if (transaction.type === 'expense') {
-      item.expense += transaction.amount;
+      item.expense += toFiniteNumber(transaction.amount);
     }
   }
 
@@ -240,7 +249,10 @@ export function InsightsPage() {
   const topExpenses = useMemo(() => buildTopExpenseTransactions(txns, data.categories), [txns, data.categories]);
   const expenseBuckets = useMemo(() => buildExpenseAmountBuckets(txns), [txns]);
   const runRate = useMemo(() => buildMonthlyRunRate(data.transactions, 12), [data.transactions]);
-  const savingsRate = totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
+  const safeTotalIncome = toFiniteNumber(totalIncome);
+  const safeTotalExpense = toFiniteNumber(totalExpense);
+  const savingsRate = safeTotalIncome > 0 ? (safeTotalIncome - safeTotalExpense) / safeTotalIncome : 0;
+  const savingsRatePercent = Number.isFinite(savingsRate) ? Math.round(savingsRate * 100) : 0;
 
   return (
     <div className="page">
@@ -259,17 +271,17 @@ export function InsightsPage() {
       <section className="metric-grid metric-grid--tight">
         <motion.article className="metric-card metric-card--positive" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <span><TrendingUp size={13} /> Thu nhập</span>
-          <strong><CountUp end={totalIncome} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
+          <strong><CountUp key={`insights-income-${safeTotalIncome}`} end={safeTotalIncome} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue={false} /></strong>
           <small>{range.label}</small>
         </motion.article>
         <motion.article className="metric-card metric-card--negative" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <span><TrendingDown size={13} /> Chi tiêu</span>
-          <strong><CountUp end={totalExpense} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
+          <strong><CountUp key={`insights-expense-${safeTotalExpense}`} end={safeTotalExpense} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue={false} /></strong>
           <small>{range.label}</small>
         </motion.article>
         <motion.article className="metric-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <span><Shield size={13} /> Tỷ lệ tiết kiệm</span>
-          <strong><CountUp end={Math.round(savingsRate * 100)} duration={reduceMotion ? 0 : 0.8} preserveValue />%</strong>
+          <strong><CountUp key={`insights-savings-${savingsRatePercent}`} end={savingsRatePercent} duration={reduceMotion ? 0 : 0.8} preserveValue={false} />%</strong>
           <small>{largest ? `Lớn nhất: ${formatCurrency(largest.amount, data.preferences.currency)}` : 'Chưa có'}</small>
         </motion.article>
       </section>

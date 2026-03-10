@@ -20,6 +20,11 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export async function completeOnboarding(input: OnboardingPayload) {
   await ensureAppBootstrapped();
 
@@ -65,27 +70,29 @@ export async function completeOnboarding(input: OnboardingPayload) {
 export async function recalculateWalletBalances() {
   const [wallets, transactions] = await Promise.all([db.wallets.toArray(), db.transactions.toArray()]);
   const activeTransactions = transactions.filter((transaction) => !transaction.deletedAt);
-  const nextBalances = new Map(wallets.map((wallet) => [wallet.id, wallet.openingBalance]));
+  const nextBalances = new Map(wallets.map((wallet) => [wallet.id, toFiniteNumber(wallet.openingBalance)]));
 
   for (const transaction of activeTransactions) {
+    const amount = toFiniteNumber(transaction.amount);
+
     if (transaction.type === 'income') {
-      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) + transaction.amount);
+      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) + amount);
     }
 
     if (transaction.type === 'expense') {
-      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) - transaction.amount);
+      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) - amount);
     }
 
     if (transaction.type === 'transfer' && transaction.toWalletId) {
-      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) - transaction.amount);
-      nextBalances.set(transaction.toWalletId, (nextBalances.get(transaction.toWalletId) ?? 0) + transaction.amount);
+      nextBalances.set(transaction.walletId, (nextBalances.get(transaction.walletId) ?? 0) - amount);
+      nextBalances.set(transaction.toWalletId, (nextBalances.get(transaction.toWalletId) ?? 0) + amount);
     }
   }
 
   await db.wallets.bulkPut(
     wallets.map((wallet) => ({
       ...wallet,
-      currentBalanceCache: nextBalances.get(wallet.id) ?? wallet.openingBalance,
+      currentBalanceCache: toFiniteNumber(nextBalances.get(wallet.id), toFiniteNumber(wallet.openingBalance)),
       updatedAt: nowIso(),
     })),
   );
@@ -202,7 +209,7 @@ export async function upsertTransaction(input: TransactionInput) {
   const record: TransactionRecord = {
     id: existing?.id ?? createId('txn'),
     type: input.type,
-    amount: input.amount,
+    amount: toFiniteNumber(input.amount),
     walletId: input.walletId,
     toWalletId: input.type === 'transfer' ? input.toWalletId : undefined,
     categoryId: input.type === 'transfer' ? undefined : input.categoryId,

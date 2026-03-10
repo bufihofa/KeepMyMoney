@@ -239,6 +239,34 @@ function normalizeText(value: string) {
     .trim();
 }
 
+function parseLooseNumber(value: unknown, fallback = 0) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  if (typeof value !== 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  const raw = value.trim();
+  if (!raw) return fallback;
+
+  const compact = raw.replace(/\s+/g, '').replace(/[^0-9,.-]/g, '');
+  const hasComma = compact.includes(',');
+  const hasDot = compact.includes('.');
+
+  let normalized = compact;
+  if (hasComma && hasDot) {
+    normalized = compact.replace(/\./g, '').replace(',', '.');
+  } else if (hasComma && !hasDot) {
+    normalized = compact.replace(',', '.');
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 function pickCategoryId(input: Record<string, unknown>, categories: ReceiptCategoryOption[]) {
   const directId = typeof input.category_id === 'string' ? input.category_id.trim() : '';
   if (directId && categories.some((c) => c.id === directId)) return directId;
@@ -255,9 +283,9 @@ function pickCategoryId(input: Record<string, unknown>, categories: ReceiptCateg
 
 function normalizeItems(items: Array<Record<string, unknown>>, categories: ReceiptCategoryOption[]): ReceiptItemDraft[] {
   return items.map((item) => {
-    const quantity = Number(item.quantity || 0) || 1;
-    const unitPrice = Number(item.unit_price || 0);
-    const amountRaw = Number(item.amount || item.total || item.line_total || item.total_price || 0);
+    const quantity = parseLooseNumber(item.quantity, 1) || 1;
+    const unitPrice = parseLooseNumber(item.unit_price, 0);
+    const amountRaw = parseLooseNumber(item.amount ?? item.total ?? item.line_total ?? item.total_price ?? 0, 0);
     const amount = amountRaw > 0 ? amountRaw : quantity * unitPrice;
 
     return {
