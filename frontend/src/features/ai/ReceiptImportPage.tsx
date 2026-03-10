@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { toast } from 'sonner';
@@ -29,7 +29,6 @@ function fileToDataUrl(file: File) {
 }
 
 export function ReceiptImportPage() {
-  const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const captureRef = useRef<HTMLInputElement | null>(null);
   const data = useAppData();
@@ -178,12 +177,6 @@ export function ReceiptImportPage() {
 
   const total = useMemo(() => items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0), [items]);
 
-  useEffect(() => {
-    if (searchParams.get('autocapture') !== '1') return;
-    void pickFromCamera();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
   return (
     <div className="page receipt-import-page">
       <header className="page-header">
@@ -200,7 +193,7 @@ export function ReceiptImportPage() {
         <div className="inline-actions" style={{ flexWrap: 'wrap' }}>
           <button type="button" className="primary-button" onClick={() => void pickFromCamera()}><CameraIcon size={14} /> Chụp ảnh</button>
           <button type="button" className="soft-button" onClick={() => void pickFromFile()}><Upload size={14} /> Tải ảnh</button>
-          <button type="button" className="primary-button" onClick={() => void runExtraction()} disabled={!preview || isExtracting}><Sparkles size={14} /> {isExtracting ? 'Đang tách......' : 'Tách hóa đơn'}</button>
+          <button type="button" className="primary-button" onClick={() => void runExtraction()} disabled={!preview || isExtracting}><Sparkles size={14} /> {isExtracting ? 'Đang tách' : 'Phân tích'}</button>
         </div>
 
         <input ref={inputRef} type="file" accept="image/*" onChange={(e) => void onFilePicked(e)} style={{ display: 'none' }} />

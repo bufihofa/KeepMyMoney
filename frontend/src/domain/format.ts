@@ -17,21 +17,28 @@ import {
 } from 'date-fns';
 import type { DateRange, PeriodPreset, ThemeMode, WeekStart } from './models';
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export function formatCurrency(value: number, currency = 'VND') {
+  const safeValue = toFiniteNumber(value);
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     maximumFractionDigits: currency === 'VND' ? 0 : 2,
-  }).format(value);
+  }).format(safeValue);
 }
 
 export function formatCompactCurrency(value: number, currency = 'VND') {
+  const safeValue = toFiniteNumber(value);
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     notation: 'compact',
     maximumFractionDigits: 1,
-  }).format(value);
+  }).format(safeValue);
 }
 
 export function formatPercent(value: number) {

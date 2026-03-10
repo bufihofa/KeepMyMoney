@@ -9,6 +9,11 @@ import { useAppData } from '../../hooks/useAppData';
 import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 const stagger = {
   hidden: { opacity: 0, y: 12 },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.35, ease: [0.16, 1, 0.3, 1] } }),
@@ -20,10 +25,10 @@ export function BudgetsPage() {
   const reduceMotion = shouldReduceMotion();
   const monthKey = toMonthKey();
   const progress = useMemo(() => buildBudgetProgress(data.budgets, data.transactions, data.categories, monthKey), [data.budgets, data.transactions, data.categories, monthKey]);
-  const totalBudget = useMemo(() => progress.reduce((s, i) => s + i.budget.limitAmount, 0), [progress]);
-  const totalSpent = useMemo(() => progress.reduce((s, i) => s + i.spent, 0), [progress]);
-  const totalProjected = useMemo(() => progress.reduce((s, i) => s + i.projected, 0), [progress]);
-  const usage = totalBudget > 0 ? totalSpent / totalBudget : 0;
+  const totalBudget = useMemo(() => toFiniteNumber(progress.reduce((s, i) => s + toFiniteNumber(i.budget.limitAmount), 0)), [progress]);
+  const totalSpent = useMemo(() => toFiniteNumber(progress.reduce((s, i) => s + toFiniteNumber(i.spent), 0)), [progress]);
+  const totalProjected = useMemo(() => toFiniteNumber(progress.reduce((s, i) => s + toFiniteNumber(i.projected), 0)), [progress]);
+  const usage = totalBudget > 0 ? toFiniteNumber(totalSpent / totalBudget) : 0;
   const remaining = totalBudget - totalSpent;
   const clampedUsage = Math.max(0, Math.min(usage, 1));
   const statusLabel: Record<string, string> = { safe: 'An toàn', watch: 'Cẩn thận', danger: 'Nguy hiểm', over: 'Vượt ngưỡng' };

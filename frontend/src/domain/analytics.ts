@@ -13,6 +13,11 @@ import type {
 import { getBudgetStatus } from '../lib/math';
 import { isInRange, signedChange, toMonthKey } from './format';
 
+function toFiniteNumber(value: unknown, fallback = 0) {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export function getActiveTransactions(transactions: TransactionRecord[]) {
   return transactions.filter((transaction) => !transaction.deletedAt);
 }
@@ -42,17 +47,17 @@ export function buildSummaryMetrics(current: TransactionRecord[], previous: Tran
 export function sumTransactions(transactions: TransactionRecord[], type: 'income' | 'expense') {
   return transactions
     .filter((transaction) => transaction.type === type)
-    .reduce((total, transaction) => total + transaction.amount, 0);
+    .reduce((total, transaction) => total + toFiniteNumber(transaction.amount), 0);
 }
 
 export function buildCategorySpend(transactions: TransactionRecord[], categories: CategoryRecord[]): CategorySpend[] {
   const expenseTransactions = transactions.filter((transaction) => transaction.type === 'expense' && transaction.categoryId);
-  const total = expenseTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const total = expenseTransactions.reduce((sum, transaction) => sum + toFiniteNumber(transaction.amount), 0);
   const totals = new Map<string, number>();
 
   for (const transaction of expenseTransactions) {
     const key = transaction.categoryId!;
-    totals.set(key, (totals.get(key) ?? 0) + transaction.amount);
+    totals.set(key, (totals.get(key) ?? 0) + toFiniteNumber(transaction.amount));
   }
 
   return categories
@@ -86,19 +91,23 @@ export function buildBudgetProgress(
             transaction.categoryId === budget.categoryId &&
             transaction.occurredAt.startsWith(monthKey),
         )
-        .reduce((sum, transaction) => sum + transaction.amount, 0);
+        .reduce((sum, transaction) => sum + toFiniteNumber(transaction.amount), 0);
 
-      const usage = spent / budget.limitAmount;
+      const limitAmount = toFiniteNumber(budget.limitAmount);
+      const usage = limitAmount > 0 ? spent / limitAmount : 0;
       const category = categories.find((item) => item.id === budget.categoryId);
       const now = new Date();
       const dayOfMonth = now.getDate();
       const projected = dayOfMonth === 0 ? spent : (spent / dayOfMonth) * 30;
 
       return {
-        budget,
+        budget: {
+          ...budget,
+          limitAmount,
+        },
         category,
         spent,
-        remaining: budget.limitAmount - spent,
+        remaining: limitAmount - spent,
         usage,
         projected,
         status: getBudgetStatus(usage),
@@ -165,7 +174,7 @@ export function buildWalletDistribution(wallets: WalletRecord[]) {
     .filter((wallet) => !wallet.isArchived)
     .map((wallet) => ({
       name: wallet.name,
-      value: wallet.currentBalanceCache,
+      value: toFiniteNumber(wallet.currentBalanceCache),
       color: wallet.color,
     }))
     .sort((left, right) => right.value - left.value);

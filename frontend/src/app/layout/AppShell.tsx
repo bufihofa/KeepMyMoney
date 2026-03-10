@@ -117,7 +117,7 @@ export function AppShell() {
 
   function handleCameraClick() {
     if (dragMetaRef.current.moved) return;
-    navigate('/receipt-import?autocapture=1');
+    navigate('/receipt-import');
   }
 
   function handleAgentClick() {
