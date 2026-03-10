@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import CountUp from 'react-countup';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { TrendingUp, TrendingDown, Activity, Settings, Plus, ArrowRight, Wallet, CreditCard, PiggyBank, Banknote, ChevronRight } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { IconGlyph } from '../../components/ui/IconGlyph';
 import { useAppData } from '../../hooks/useAppData';
@@ -36,6 +37,7 @@ export function HomePage() {
   const openTransactionSheet = useUIStore((s) => s.openTransactionSheet);
   const openWalletSheet = useUIStore((s) => s.openWalletSheet);
   const [listRef] = useAutoAnimate();
+  const isNative = Capacitor.isNativePlatform();
 
   const range = getDateRange(periodPreset, data.preferences.weekStart);
   const prevRange = getPreviousDateRange(periodPreset, data.preferences.weekStart);
@@ -148,7 +150,7 @@ export function HomePage() {
                       contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} 
                       itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} 
                     />
-                    <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={6} stroke="none" filter="url(#pieShadowDeeper)">
+                    <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={6} stroke="none" filter={isNative ? undefined : "url(#pieShadowDeeper)"}>
                       {cats.map((e) => <Cell key={e.categoryId} fill={e.color} />)}
                     </Pie>
                   </PieChart>

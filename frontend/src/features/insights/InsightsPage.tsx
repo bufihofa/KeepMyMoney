@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { Area, ComposedChart, Line, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { TrendingUp, TrendingDown, Shield } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { PERIOD_PRESETS } from '../../db/defaults';
 import { buildCategorySpend, buildDailyCashflow, buildWalletDistribution, filterTransactionsByRange, findLargestTransaction, sumTransactions } from '../../domain/analytics';
 import { formatCurrency, formatCompactCurrency, getDateRange } from '../../domain/format';
@@ -14,6 +15,7 @@ export function InsightsPage() {
   const data = useAppData();
   const periodPreset = useUIStore((s) => s.periodPreset);
   const setPeriodPreset = useUIStore((s) => s.setPeriodPreset);
+  const isNative = Capacitor.isNativePlatform();
   const range = getDateRange(periodPreset, data.preferences.weekStart);
   const txns = filterTransactionsByRange(data.transactions, range);
   const cats = buildCategorySpend(txns, data.categories).slice(0, 6);
@@ -86,8 +88,8 @@ export function InsightsPage() {
                 <Area type="monotone" dataKey="income" fillOpacity={1} fill="url(#colorIncome)" stroke="none" />
                 <Area type="monotone" dataKey="expense" fillOpacity={1} fill="url(#colorExpense)" stroke="none" />
                 
-                <Line type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }} filter="url(#glowIncome)" />
-                <Line type="monotone" dataKey="expense" name="Chi tiêu" stroke="#f97316" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#f97316' }} filter="url(#glowExpense)" />
+                <Line type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }} filter={isNative ? undefined : "url(#glowIncome)"} />
+                <Line type="monotone" dataKey="expense" name="Chi tiêu" stroke="#f97316" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#f97316' }} filter={isNative ? undefined : "url(#glowExpense)"} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -109,7 +111,7 @@ export function InsightsPage() {
                     </filter>
                   </defs>
                   <Tooltip formatter={(value: number) => formatCurrency(value, data.preferences.currency)} contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} />
-                  <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={5} stroke="none" filter="url(#pieShadowDeeper)">
+                  <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={5} stroke="none" filter={isNative ? undefined : "url(#pieShadowDeeper)"}>
                     {cats.map((e) => <Cell key={e.categoryId} fill={e.color} />)}
                   </Pie>
                 </PieChart>
