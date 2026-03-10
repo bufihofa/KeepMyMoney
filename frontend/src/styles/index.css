@@ -59,6 +59,43 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Performance Optimizations for Native Webview ── */
+.is-native {
+  --glass-blur: 0px !important;
+  --glass-blur-heavy: 0px !important;
+  --glass: rgba(255,255,255,0.92);
+  --glass-strong: rgba(255,255,255,0.96);
+  --glass-subtle: rgba(255,255,255,0.8);
+  --shadow-glass: 0 2px 12px rgba(15,23,42,0.04);
+  --shadow-glass-lg: 0 4px 20px rgba(15,23,42,0.06);
+  --shadow-float: 0 10px 30px rgba(15,23,42,0.08);
+  /* Simplify mesh for native */
+  --bg-mesh: linear-gradient(to bottom, var(--bg), #e2e8f0);
+}
+
+html[data-theme='dark'].is-native {
+  --glass: rgba(22,30,50,0.92);
+  --glass-strong: rgba(15,23,30,0.96);
+  --glass-subtle: rgba(30,41,59,0.85);
+  --shadow-glass: 0 4px 16px rgba(0,0,0,0.2);
+  --bg-mesh: linear-gradient(to bottom, var(--bg), #0f172a);
+}
+
+.is-native body {
+  background-attachment: scroll !important; /* Fixed background is heavy on mobile */
+}
+
+/* Force hardware acceleration on commonly animated components */
+.is-native .page,
+.is-native .panel,
+.is-native .metric-card,
+.is-native .transaction-row,
+.is-native .nav-dock,
+.is-native .drawer-content {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
 html[data-theme='dark'] {
   color-scheme: dark;
   --bg: hsl(225,30%,6%);
@@ -117,6 +154,13 @@ h3{font-size:0.95rem;font-weight:600}
   backdrop-filter:blur(var(--glass-blur)) saturate(1.6);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.6);
   border:1px solid var(--glass-border);
   box-shadow:var(--shadow-glass), var(--glass-inner-glow);
+}
+/* Disable backdrop-filter completely if blur is 0 (for .is-native) */
+.is-native .glass, .is-native .panel, .is-native .hero-card, .is-native .splash-card, 
+.is-native .onboarding-hero, .is-native .onboarding-form, .is-native .drawer-content, 
+.is-native [vaul-drawer], .is-native .confirm-dialog {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 /* Light glass — no blur, just background + border for small items */
 .metric-card,.budget-card,.transaction-row,.preview-card,.empty-state,.wallet-card{

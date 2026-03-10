@@ -1,4 +1,5 @@
-﻿import { useEffect } from 'react';
+import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { usePreferences } from '../hooks/useAppData';
 import { useBootstrap } from '../hooks/useBootstrap';
@@ -23,6 +24,14 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = resolveTheme(preferences.theme);
   }, [preferences.theme]);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      document.documentElement.classList.add('is-native');
+    } else {
+      document.documentElement.classList.remove('is-native');
+    }
+  }, []);
 
   if (error) {
     return (
