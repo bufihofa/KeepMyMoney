@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Info } from 'lucide-react';
 import { shouldReduceMotion } from '../../lib/performance';
@@ -19,6 +20,18 @@ const toneIcons = { danger: Trash2, warning: AlertTriangle, info: Info };
 export function ConfirmDialog({ open, title, description, confirmLabel = 'Xác nhận', cancelLabel = 'Hủy', tone = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
     const Icon = toneIcons[tone];
     const reduceMotion = shouldReduceMotion();
+
+    useEffect(() => {
+        if (typeof document === 'undefined') return;
+
+        if (open) {
+            document.body.classList.add('confirm-open');
+        }
+
+        return () => {
+            document.body.classList.remove('confirm-open');
+        };
+    }, [open]);
     
     if (typeof document === 'undefined') return null;
     

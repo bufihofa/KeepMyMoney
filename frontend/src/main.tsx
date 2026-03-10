@@ -15,8 +15,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <App />
       <Toaster
-        position="bottom-center"
-        offset={92}
+        position="top-center"
+        offset={20}
         toastOptions={{
           className: 'sonner-toast',
           duration: 3000,

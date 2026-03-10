@@ -7,6 +7,10 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host",
+    "llm:test": "node --env-file=.env scripts/test-nanogpt-messages.mjs",
+    "llm:test:stream": "node --env-file=.env scripts/test-nanogpt-messages.mjs --stream",
+    "llm:receipt:v2": "node --env-file=.env scripts/receipt-items-v2.mjs",
+    "llm:receipt:v3": "node --env-file=.env scripts/receipt-items-v3.mjs",
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android"
@@ -16,6 +20,7 @@
     "@capacitor/app": "^7.0.0",
     "@capacitor/clipboard": "^7.0.0",
     "@capacitor/core": "^7.0.0",
+    "@capacitor/camera": "^7.0.0",
     "@capacitor/haptics": "^7.0.0",
     "@capacitor/keyboard": "^7.0.0",
     "@capacitor/splash-screen": "^7.0.0",

@@ -10,6 +10,7 @@ import { BudgetsPage } from '../features/budgets/BudgetsPage';
 import { InsightsPage } from '../features/insights/InsightsPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { OnboardingPage } from '../features/onboarding/OnboardingPage';
+import { ReceiptImportPage } from '../features/ai/ReceiptImportPage';
 import { TransactionSheet } from '../features/shared/TransactionSheet';
 import { WalletSheet } from '../features/shared/WalletSheet';
 import { CategorySheet } from '../features/shared/CategorySheet';
@@ -64,6 +65,7 @@ export function App() {
           <Route path="budgets" element={<BudgetsPage />} />
           <Route path="insights" element={<InsightsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="receipt-import" element={<ReceiptImportPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

@@ -28,6 +28,13 @@ const stagger = {
 
 const walletTypeIcon: Record<string, typeof Wallet> = { cash: Banknote, bank: CreditCard, ewallet: Wallet, savings: PiggyBank, other: Wallet };
 const presetLabels: Record<string, string> = { week: 'Tuần', month: 'Tháng', quarter: 'Quý', year: 'Năm', all: 'Tất cả' };
+const walletTypeLabel: Record<string, string> = {
+  cash: 'Tiền mặt',
+  bank: 'Ngân hàng',
+  ewallet: 'Ví điện tử',
+  savings: 'Tiết kiệm',
+  other: 'Khác',
+};
 
 export function HomePage() {
   const data = useAppData();
@@ -59,7 +66,7 @@ export function HomePage() {
           <h1>
             <CountUp end={total} separator="." prefix={data.preferences.currency === 'VND' ? '₫' : '$'} duration={reduceMotion ? 0 : 1.2} preserveValue />
           </h1>
-          <p className="section-copy">Tổng số dư trên {activeWallets.length} ví hoạt động</p>
+          <p className="section-copy">Bạn đang quản lý {activeWallets.length} ví hoạt động</p>
         </div>
         <Link to="/settings" className="icon-button icon-button--ghost" aria-label="Cài đặt">
           <Settings size={16} />
@@ -74,17 +81,17 @@ export function HomePage() {
             return (
               reduceMotion ? (
                 <button key={wallet.id} type="button" className="wallet-card" style={{ background: `linear-gradient(135deg, ${wallet.color}, ${wallet.color}bb)` }} onClick={() => openWalletSheet(wallet)}>
-                  <span className="wallet-card__name"><WIcon size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />{wallet.name}</span>
+                  <span className="wallet-card__name"><WIcon size={12} className="wallet-card__name-icon" />{wallet.name}</span>
                   <span className="wallet-card__balance">{formatCurrency(wallet.currentBalanceCache, wallet.currency)}</span>
-                  <span className="wallet-card__type">{wallet.type === 'cash' ? 'Tiền mặt' : wallet.type === 'bank' ? 'Ngân hàng' : wallet.type === 'ewallet' ? 'Ví điện tử' : wallet.type === 'savings' ? 'Tiết kiệm' : 'Khác'}</span>
+                  <span className="wallet-card__type">{walletTypeLabel[wallet.type] ?? 'Khác'}</span>
                 </button>
               ) : (
                 <motion.button key={wallet.id} type="button" className="wallet-card"
                   style={{ background: `linear-gradient(135deg, ${wallet.color}, ${wallet.color}bb)` }}
                   onClick={() => openWalletSheet(wallet)} custom={i} initial="hidden" animate="show" variants={stagger}>
-                  <span className="wallet-card__name"><WIcon size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />{wallet.name}</span>
+                  <span className="wallet-card__name"><WIcon size={12} className="wallet-card__name-icon" />{wallet.name}</span>
                   <span className="wallet-card__balance">{formatCurrency(wallet.currentBalanceCache, wallet.currency)}</span>
-                  <span className="wallet-card__type">{wallet.type === 'cash' ? 'Tiền mặt' : wallet.type === 'bank' ? 'Ngân hàng' : wallet.type === 'ewallet' ? 'Ví điện tử' : wallet.type === 'savings' ? 'Tiết kiệm' : 'Khác'}</span>
+                  <span className="wallet-card__type">{walletTypeLabel[wallet.type] ?? 'Khác'}</span>
                 </motion.button>
               )
             );
@@ -112,17 +119,17 @@ export function HomePage() {
         <div className="metric-grid">
           <article className="metric-card metric-card--positive">
             <span><TrendingUp size={13} /> Thu nhập</span>
-            <strong><CountUp end={summary.income} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
+            <strong><CountUp end={summary.income} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.incomeChange)} so với kỳ trước</small>
           </article>
           <article className="metric-card metric-card--negative">
             <span><TrendingDown size={13} /> Chi tiêu</span>
-            <strong><CountUp end={summary.expense} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
+            <strong><CountUp end={summary.expense} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.expenseChange)} so với kỳ trước</small>
           </article>
-          <article className="metric-card">
+          <article className="metric-card metric-card--net">
             <span><Activity size={13} /> Ròng</span>
-            <strong><CountUp end={summary.net} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
+            <strong><CountUp end={summary.net} duration={reduceMotion ? 0 : 0.8} preserveValue formattingFn={(value) => formatCompactCurrency(value, data.preferences.currency)} /></strong>
             <small>{formatPercent(summary.netChange)} so với kỳ trước</small>
           </article>
         </div>

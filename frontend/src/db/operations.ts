@@ -249,6 +249,15 @@ export async function upsertBudget(input: BudgetInput) {
   });
 }
 
+export async function deleteBudget(budgetId: string) {
+  const budget = await db.budgets.get(budgetId);
+  if (!budget) {
+    return;
+  }
+
+  await db.budgets.delete(budgetId);
+}
+
 export async function exportSnapshot(): Promise<SnapshotPayload> {
   await ensureAppBootstrapped();
   const [meta, wallets, categories, tags, transactions, budgets] = await Promise.all([

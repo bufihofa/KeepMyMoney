@@ -1,5 +1,6 @@
 ﻿import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Plus, Pencil, Archive, Download, Upload, Copy, Trash2, Zap } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -9,6 +10,7 @@ import { db, setPreferences } from '../../db/database';
 import { archiveWallet, clearLocalData, exportSnapshot, importSnapshot } from '../../db/operations';
 import { snapshotSchema } from '../../domain/schemas';
 import { copyText, impact } from '../../lib/device';
+import { getAISettings, setAISettings } from '../../lib/ai';
 import { useAppData } from '../../hooks/useAppData';
 import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
@@ -22,6 +24,7 @@ export function SettingsPage() {
   const [importJson, setImportJson] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [confirmAction, setConfirmAction] = useState<null | { type: 'archive'; walletId: string } | { type: 'clear' }>(null);
+  const [ai, setAi] = useState(() => getAISettings());
 
   const importPreview = useMemo(() => {
     if (!importJson.trim()) return null;
@@ -67,6 +70,11 @@ export function SettingsPage() {
       toast.success('Đã xóa dữ liệu cục bộ');
     }
     setConfirmAction(null);
+  };
+
+  const handleSaveAI = () => {
+    setAISettings(ai);
+    toast.success('Đã lưu cấu hình AI');
   };
 
   return (
@@ -155,6 +163,20 @@ export function SettingsPage() {
       </motion.section>
 
       {/* Diagnostics */}
+      <motion.section className="panel" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.23 }}>
+        <div className="panel__header"><div><p className="eyebrow">AI</p><h2>LLM trực tiếp trong app</h2></div>
+          <Link to="/receipt-import" className="soft-button">Mở nhập hóa đơn AI</Link>
+        </div>
+        <div className="field-grid">
+          <label className="field"><span>Endpoint</span><input value={ai.endpoint} onChange={(e) => setAi((prev) => ({ ...prev, endpoint: e.target.value }))} placeholder="https://nano-gpt.com/api/v1/messages" /></label>
+          <label className="field"><span>Model</span><input value={ai.model} onChange={(e) => setAi((prev) => ({ ...prev, model: e.target.value }))} placeholder="moonshotai/kimi-k2.5" /></label>
+          <label className="field"><span>API Key</span><input value={ai.apiKey} onChange={(e) => setAi((prev) => ({ ...prev, apiKey: e.target.value }))} placeholder="sk-..." type="password" /></label>
+        </div>
+        <div className="inline-actions" style={{ marginTop: '0.75rem' }}>
+          <button type="button" className="primary-button" onClick={handleSaveAI}>Lưu cấu hình AI</button>
+        </div>
+      </motion.section>
+
       <motion.section className="panel panel--dense" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.25 }}>
         <div className="panel__header panel__header--compact"><h2>Chẩn đoán</h2></div>
         <div className="setting-row">

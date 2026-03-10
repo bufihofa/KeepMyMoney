@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Plus, Search, Copy, Trash2 } from 'lucide-react';
+import { Plus, Search, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { IconGlyph } from '../../components/ui/IconGlyph';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -145,10 +145,7 @@ export function TransactionsPage() {
                           </div>
                           <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
                         </button>
-                        <div className="inline-actions">
-                          <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
-                          <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
-                        </div>
+                        <button type="button" className="transaction-delete-button" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
                       </article>
                     ) : (
                       <motion.article key={tx.id} className="transaction-row transaction-row--card" custom={i} initial="hidden" animate="show" variants={stagger}>
@@ -162,10 +159,7 @@ export function TransactionsPage() {
                           </div>
                           <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
                         </button>
-                        <div className="inline-actions">
-                          <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
-                          <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
-                        </div>
+                        <button type="button" className="transaction-delete-button" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={13} /></button>
                       </motion.article>
                     )
                   );
