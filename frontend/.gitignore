@@ -1,0 +1,7 @@
+﻿node_modules/
+dist/
+android/
+.coverage/
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,146 @@
+﻿name: Build Android APK
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: keepmymoney-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build web assets
+        working-directory: frontend
+        run: npm run build
+
+      - name: Ensure Android platform exists
+        working-directory: frontend
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor Android
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        working-directory: frontend/android
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        working-directory: frontend/android
+        run: ./gradlew assembleDebug
+
+      - name: Build metadata
+        id: meta
+        run: echo "timestamp=$(date +'%Y-%m-%d_%H-%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Rename Debug APK
+        run: mv frontend/android/app/build/outputs/apk/debug/app-debug.apk frontend/android/app/build/outputs/apk/debug/KeepMyMoney-debug-${{ steps.meta.outputs.timestamp }}.apk
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeepMyMoney-debug-${{ steps.meta.outputs.timestamp }}
+          path: frontend/android/app/build/outputs/apk/debug/KeepMyMoney-debug-${{ steps.meta.outputs.timestamp }}.apk
+          retention-days: 14
+
+  build-release:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build web assets
+        working-directory: frontend
+        run: npm run build
+
+      - name: Ensure Android platform exists
+        working-directory: frontend
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor Android
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        working-directory: frontend/android
+        run: chmod +x ./gradlew
+
+      - name: Build Release APK
+        working-directory: frontend/android
+        run: ./gradlew assembleRelease
+
+      - name: Build metadata
+        id: meta
+        run: echo "timestamp=$(date +'%Y-%m-%d_%H-%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Rename Release APK
+        run: mv frontend/android/app/build/outputs/apk/release/app-release-unsigned.apk frontend/android/app/build/outputs/apk/release/KeepMyMoney-release-${{ steps.meta.outputs.timestamp }}.apk
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeepMyMoney-release-${{ steps.meta.outputs.timestamp }}
+          path: frontend/android/app/build/outputs/apk/release/KeepMyMoney-release-${{ steps.meta.outputs.timestamp }}.apk
+          retention-days: 30
