@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Info } from 'lucide-react';
 
@@ -16,7 +17,10 @@ const toneIcons = { danger: Trash2, warning: AlertTriangle, info: Info };
 
 export function ConfirmDialog({ open, title, description, confirmLabel = 'Xác nhận', cancelLabel = 'Hủy', tone = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
     const Icon = toneIcons[tone];
-    return (
+    
+    if (typeof document === 'undefined') return null;
+    
+    return createPortal(
         <AnimatePresence>
             {open ? (
                 <motion.div className="confirm-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onCancel}>
@@ -34,6 +38,7 @@ export function ConfirmDialog({ open, title, description, confirmLabel = 'Xác n
                     </motion.div>
                 </motion.div>
             ) : null}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }

@@ -100,11 +100,8 @@ export function HomePage() {
         <div className="hero-card__heading">
           <div>
             <p className="eyebrow">{range.label}</p>
-            <h2>Dòng tiền ròng {formatCompactCurrency(summary.net, data.preferences.currency)}</h2>
+            <h2>{formatCompactCurrency(summary.net, data.preferences.currency)}</h2>
           </div>
-          <button type="button" className="soft-button" onClick={() => openTransactionSheet()}>
-            <Plus size={14} /> Thêm
-          </button>
         </div>
         <div className="metric-grid">
           <article className="metric-card metric-card--positive">

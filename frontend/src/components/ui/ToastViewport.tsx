@@ -1,4 +1,5 @@
-﻿import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { IconGlyph } from './IconGlyph';
 import { useUIStore } from '../../stores/uiStore';
@@ -34,7 +35,9 @@ export function ToastViewport() {
     };
   }, [removeToast, toasts]);
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="toast-viewport" aria-live="polite" aria-atomic="true">
       <AnimatePresence>
         {toasts.map((toast) => (
@@ -54,6 +57,7 @@ export function ToastViewport() {
           </motion.div>
         ))}
       </AnimatePresence>
-    </div>
+    </div>,
+    document.body
   );
 }

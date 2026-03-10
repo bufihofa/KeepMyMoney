@@ -85,8 +85,8 @@ export function InsightsPage() {
                 <YAxis stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => val >= 1000000 ? `${(val/1000000).toFixed(0)}Tr` : val} />
                 <Tooltip contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} cursor={{ stroke: 'rgba(148,163,184,0.2)', strokeWidth: 2, strokeDasharray: '4 4' }} />
                 
-                <Area type="monotone" dataKey="income" fillOpacity={1} fill="url(#colorIncome)" stroke="none" />
-                <Area type="monotone" dataKey="expense" fillOpacity={1} fill="url(#colorExpense)" stroke="none" />
+                <Area type="monotone" dataKey="income" fillOpacity={1} fill="url(#colorIncome)" stroke="none" tooltipType="none" />
+                <Area type="monotone" dataKey="expense" fillOpacity={1} fill="url(#colorExpense)" stroke="none" tooltipType="none" />
                 
                 <Line type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }} filter={isNative ? undefined : "url(#glowIncome)"} />
                 <Line type="monotone" dataKey="expense" name="Chi tiêu" stroke="#f97316" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#f97316' }} filter={isNative ? undefined : "url(#glowExpense)"} />
