@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, AlertTriangle, Info } from 'lucide-react';
+import { shouldReduceMotion } from '../../lib/performance';
 
 interface ConfirmDialogProps {
     open: boolean;
@@ -17,15 +18,16 @@ const toneIcons = { danger: Trash2, warning: AlertTriangle, info: Info };
 
 export function ConfirmDialog({ open, title, description, confirmLabel = 'Xác nhận', cancelLabel = 'Hủy', tone = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
     const Icon = toneIcons[tone];
+    const reduceMotion = shouldReduceMotion();
     
     if (typeof document === 'undefined') return null;
     
     return createPortal(
         <AnimatePresence>
             {open ? (
-                <motion.div className="confirm-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onCancel}>
-                    <motion.div className="confirm-dialog" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 28 }} onClick={(e) => e.stopPropagation()}>
+                <motion.div className="confirm-overlay" initial={reduceMotion ? false : { opacity: 0 }} animate={reduceMotion ? undefined : { opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }} onClick={onCancel}>
+                    <motion.div className="confirm-dialog" initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 20 }} animate={reduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, scale: 0.9, y: 20 }}
+                        transition={reduceMotion ? undefined : { type: 'spring', stiffness: 400, damping: 28 }} onClick={(e) => e.stopPropagation()}>
                         <div className="empty-state__icon" style={{ margin: '0 auto' }}>
                             <Icon size={24} />
                         </div>

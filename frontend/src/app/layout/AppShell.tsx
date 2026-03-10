@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, ArrowLeftRight, PieChart, BarChart3, Plus } from 'lucide-react';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 const tabs = [
@@ -13,6 +14,7 @@ const tabs = [
 export function AppShell() {
   const openTransactionSheet = useUIStore((s) => s.openTransactionSheet);
   const location = useLocation();
+  const reduceMotion = shouldReduceMotion();
 
   return (
     <div className="app-shell">
@@ -23,10 +25,10 @@ export function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={reduceMotion ? undefined : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             <Outlet />
           </motion.div>
@@ -46,7 +48,7 @@ export function AppShell() {
                 {({ isActive }) => (
                   <>
                     <t.icon className="nav-dock__icon" strokeWidth={isActive ? 2.5 : 2} />
-                    {isActive && <motion.div className="nav-dock__dot" layoutId="navDot" transition={{ type: 'spring', stiffness: 500, damping: 30 }} />}
+                    {isActive && (reduceMotion ? <div className="nav-dock__dot" /> : <motion.div className="nav-dock__dot" layoutId="navDot" transition={{ type: 'spring', stiffness: 500, damping: 30 }} />)}
                   </>
                 )}
               </NavLink>
@@ -54,7 +56,7 @@ export function AppShell() {
 
             {/* Center Anchor for FAB (Notch Area) */}
             <div className="nav-dock__spacer">
-              <motion.button type="button" className="nav-dock__fab" onClick={() => openTransactionSheet()} aria-label="Thêm giao dịch" whileTap={{ scale: 0.85, rotate: 90 }}>
+              <motion.button type="button" className="nav-dock__fab" onClick={() => openTransactionSheet()} aria-label="Thêm giao dịch" whileTap={reduceMotion ? undefined : { scale: 0.85, rotate: 90 }}>
                 <Plus strokeWidth={2.5} size={28} />
               </motion.button>
             </div>
@@ -65,7 +67,7 @@ export function AppShell() {
                 {({ isActive }) => (
                   <>
                     <t.icon className="nav-dock__icon" strokeWidth={isActive ? 2.5 : 2} />
-                    {isActive && <motion.div className="nav-dock__dot" layoutId="navDot" transition={{ type: 'spring', stiffness: 500, damping: 30 }} />}
+                    {isActive && (reduceMotion ? <div className="nav-dock__dot" /> : <motion.div className="nav-dock__dot" layoutId="navDot" transition={{ type: 'spring', stiffness: 500, damping: 30 }} />)}
                   </>
                 )}
               </NavLink>

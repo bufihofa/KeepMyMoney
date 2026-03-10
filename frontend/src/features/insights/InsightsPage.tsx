@@ -1,12 +1,13 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { Area, ComposedChart, Line, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { TrendingUp, TrendingDown, Shield } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
 import { PERIOD_PRESETS } from '../../db/defaults';
 import { buildCategorySpend, buildDailyCashflow, buildWalletDistribution, filterTransactionsByRange, findLargestTransaction, sumTransactions } from '../../domain/analytics';
 import { formatCurrency, formatCompactCurrency, getDateRange } from '../../domain/format';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 const presetLabels: Record<string, string> = { week: 'Tuần', month: 'Tháng', quarter: 'Quý', year: 'Năm', all: 'Tất cả' };
@@ -15,15 +16,15 @@ export function InsightsPage() {
   const data = useAppData();
   const periodPreset = useUIStore((s) => s.periodPreset);
   const setPeriodPreset = useUIStore((s) => s.setPeriodPreset);
-  const isNative = Capacitor.isNativePlatform();
-  const range = getDateRange(periodPreset, data.preferences.weekStart);
-  const txns = filterTransactionsByRange(data.transactions, range);
-  const cats = buildCategorySpend(txns, data.categories).slice(0, 6);
-  const cashflow = buildDailyCashflow(txns, range);
-  const wallets = buildWalletDistribution(data.wallets);
-  const largest = findLargestTransaction(txns);
-  const totalIncome = sumTransactions(txns, 'income');
-  const totalExpense = sumTransactions(txns, 'expense');
+  const reduceMotion = shouldReduceMotion();
+  const range = useMemo(() => getDateRange(periodPreset, data.preferences.weekStart), [periodPreset, data.preferences.weekStart]);
+  const txns = useMemo(() => filterTransactionsByRange(data.transactions, range), [data.transactions, range]);
+  const cats = useMemo(() => buildCategorySpend(txns, data.categories).slice(0, 6), [txns, data.categories]);
+  const cashflow = useMemo(() => buildDailyCashflow(txns, range), [txns, range]);
+  const wallets = useMemo(() => buildWalletDistribution(data.wallets), [data.wallets]);
+  const largest = useMemo(() => findLargestTransaction(txns), [txns]);
+  const totalIncome = useMemo(() => sumTransactions(txns, 'income'), [txns]);
+  const totalExpense = useMemo(() => sumTransactions(txns, 'expense'), [txns]);
   const savingsRate = totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
 
   return (
@@ -43,17 +44,17 @@ export function InsightsPage() {
       <section className="metric-grid metric-grid--tight">
         <motion.article className="metric-card metric-card--positive" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <span><TrendingUp size={13} /> Thu nhập</span>
-          <strong><CountUp end={totalIncome} separator="." duration={0.8} preserveValue /></strong>
+          <strong><CountUp end={totalIncome} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
           <small>{range.label}</small>
         </motion.article>
         <motion.article className="metric-card metric-card--negative" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <span><TrendingDown size={13} /> Chi tiêu</span>
-          <strong><CountUp end={totalExpense} separator="." duration={0.8} preserveValue /></strong>
+          <strong><CountUp end={totalExpense} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong>
           <small>{range.label}</small>
         </motion.article>
         <motion.article className="metric-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <span><Shield size={13} /> Tỷ lệ tiết kiệm</span>
-          <strong><CountUp end={Math.round(savingsRate * 100)} duration={0.8} preserveValue />%</strong>
+          <strong><CountUp end={Math.round(savingsRate * 100)} duration={reduceMotion ? 0 : 0.8} preserveValue />%</strong>
           <small>{largest ? `Lớn nhất: ${formatCurrency(largest.amount, data.preferences.currency)}` : 'Chưa có'}</small>
         </motion.article>
       </section>
@@ -88,8 +89,8 @@ export function InsightsPage() {
                 <Area type="monotone" dataKey="income" fillOpacity={1} fill="url(#colorIncome)" stroke="none" tooltipType="none" />
                 <Area type="monotone" dataKey="expense" fillOpacity={1} fill="url(#colorExpense)" stroke="none" tooltipType="none" />
                 
-                <Line type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }} filter={isNative ? undefined : "url(#glowIncome)"} />
-                <Line type="monotone" dataKey="expense" name="Chi tiêu" stroke="#f97316" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#f97316' }} filter={isNative ? undefined : "url(#glowExpense)"} />
+                <Line type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }} filter={reduceMotion ? undefined : "url(#glowIncome)"} />
+                <Line type="monotone" dataKey="expense" name="Chi tiêu" stroke="#f97316" strokeWidth={3.5} dot={false} activeDot={{ r: 6, strokeWidth: 0, fill: '#f97316' }} filter={reduceMotion ? undefined : "url(#glowExpense)"} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -111,7 +112,7 @@ export function InsightsPage() {
                     </filter>
                   </defs>
                   <Tooltip formatter={(value: number) => formatCurrency(value, data.preferences.currency)} contentStyle={{ background: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }} itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '13px' }} />
-                  <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={5} stroke="none" filter={isNative ? undefined : "url(#pieShadowDeeper)"}>
+                  <Pie data={cats} dataKey="total" nameKey="name" innerRadius={80} outerRadius={108} cornerRadius={12} paddingAngle={5} stroke="none" filter={reduceMotion ? undefined : "url(#pieShadowDeeper)"}>
                     {cats.map((e) => <Cell key={e.categoryId} fill={e.color} />)}
                   </Pie>
                 </PieChart>

@@ -85,15 +85,23 @@ html[data-theme='dark'].is-native {
   background-attachment: scroll !important; /* Fixed background is heavy on mobile */
 }
 
-/* Force hardware acceleration on commonly animated components */
+/* Avoid costly persistent layers and decorative glows on Android WebView */
+.is-native .app-shell__glow {
+  display: none;
+}
+
 .is-native .page,
-.is-native .panel,
 .is-native .metric-card,
 .is-native .transaction-row,
-.is-native .nav-dock,
-.is-native .drawer-content {
-  will-change: transform, opacity;
-  transform: translateZ(0);
+.is-native .empty-state,
+.is-native .nav-dock {
+  animation: none !important;
+}
+
+.is-native .progress-bar span::after,
+.is-native .nav-dock__fab::after,
+.is-native .empty-state__icon {
+  animation: none !important;
 }
 
 html[data-theme='dark'] {
@@ -557,6 +565,22 @@ button:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
 .recharts-default-tooltip{background:rgba(10,15,30,0.9)!important;border:none!important;border-radius:var(--r-sm)!important;
   color:#fff!important;font-size:12px!important;box-shadow:var(--shadow-float)!important;backdrop-filter:blur(16px)!important}
 .recharts-tooltip-label{color:rgba(255,255,255,0.5)!important}
+
+/* Native WebView overlay simplification */
+.is-native [vaul-overlay],
+.is-native .drawer-overlay,
+.is-native .confirm-overlay,
+.is-native [data-sonner-toast],
+.is-native .recharts-default-tooltip {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.is-native [vaul-overlay],
+.is-native .drawer-overlay,
+.is-native .confirm-overlay {
+  background: rgba(0,0,0,0.28);
+}
 
 /* ── 35. Responsive ────────────────────────────────────── */
 @media(max-width:600px){

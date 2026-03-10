@@ -9,6 +9,7 @@ import { IconGlyph } from '../../components/ui/IconGlyph';
 import { CATEGORY_ICON_OPTIONS, COLOR_OPTIONS } from '../../db/defaults';
 import { upsertCategory } from '../../db/operations';
 import { categorySchema, type CategoryFormValues } from '../../domain/schemas';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 function buildDefaults(r?: { name: string; kind: CategoryFormValues['kind']; color: string; icon: string; isHidden: boolean }): CategoryFormValues {
@@ -18,6 +19,7 @@ function buildDefaults(r?: { name: string; kind: CategoryFormValues['kind']; col
 export function CategorySheet() {
   const sheet = useUIStore((s) => s.categorySheet);
   const close = useUIStore((s) => s.closeCategorySheet);
+  const reduceMotion = shouldReduceMotion();
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<CategoryFormValues>({ resolver: zodResolver(categorySchema), defaultValues: buildDefaults() });
 
   useEffect(() => { reset(buildDefaults(sheet.record)); }, [sheet.record, reset]);
@@ -45,8 +47,8 @@ export function CategorySheet() {
           <div className="category-grid-item__icon" style={{ background: color }}><IconGlyph name={icon} size="sm" /></div>
           <div><strong style={{ fontSize: '0.88rem' }}>{name || 'Xem trước'}</strong><span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>{kind === 'expense' ? 'Chi tiêu' : 'Thu nhập'}</span></div>
         </div>
-        <div className="field"><span>Màu sắc</span><div className="picker-grid">{COLOR_OPTIONS.map((c) => <motion.button key={c} type="button" className={`picker-swatch${color === c ? ' picker-swatch--selected' : ''}`} style={{ background: c }} onClick={() => setValue('color', c)} whileTap={{ scale: 0.85 }}>{color === c && <Check size={14} />}</motion.button>)}</div></div>
-        <div className="field"><span>Biểu tượng</span><div className="icon-picker-grid">{CATEGORY_ICON_OPTIONS.map((ic) => <motion.button key={ic} type="button" className={`icon-picker-item${icon === ic ? ' icon-picker-item--selected' : ''}`} onClick={() => setValue('icon', ic)} whileTap={{ scale: 0.9 }}><IconGlyph name={ic} />{ic}</motion.button>)}</div></div>
+        <div className="field"><span>Màu sắc</span><div className="picker-grid">{COLOR_OPTIONS.map((c) => <motion.button key={c} type="button" className={`picker-swatch${color === c ? ' picker-swatch--selected' : ''}`} style={{ background: c }} onClick={() => setValue('color', c)} whileTap={reduceMotion ? undefined : { scale: 0.85 }}>{color === c && <Check size={14} />}</motion.button>)}</div></div>
+        <div className="field"><span>Biểu tượng</span><div className="icon-picker-grid">{CATEGORY_ICON_OPTIONS.map((ic) => <motion.button key={ic} type="button" className={`icon-picker-item${icon === ic ? ' icon-picker-item--selected' : ''}`} onClick={() => setValue('icon', ic)} whileTap={reduceMotion ? undefined : { scale: 0.9 }}><IconGlyph name={ic} />{ic}</motion.button>)}</div></div>
         <label className="check-field"><input type="checkbox" {...register('isHidden')} /><div><strong>Ẩn danh mục</strong><span>Giữ dữ liệu lịch sử nhưng ẩn khỏi chọn nhanh.</span></div></label>
       </form>
     </Modal>

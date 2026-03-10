@@ -10,6 +10,7 @@ import { COLOR_OPTIONS, WALLET_ICON_OPTIONS, WALLET_TYPE_OPTIONS } from '../../d
 import { upsertWallet } from '../../db/operations';
 import { walletSchema, type WalletFormValues } from '../../domain/schemas';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 function buildDefaults(r?: { name: string; type: WalletFormValues['type']; currency: string; openingBalance: number; color: string; icon: string; isArchived: boolean }): WalletFormValues {
@@ -21,6 +22,7 @@ export function WalletSheet() {
   const sheet = useUIStore((s) => s.walletSheet);
   const close = useUIStore((s) => s.closeWalletSheet);
   const prefs = useAppData().preferences;
+  const reduceMotion = shouldReduceMotion();
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<WalletFormValues>({ resolver: zodResolver(walletSchema), defaultValues: buildDefaults({ name: '', type: 'cash', currency: prefs.currency, openingBalance: 0, color: '#14b8a6', icon: 'wallet', isArchived: false }) });
 
   useEffect(() => { reset(buildDefaults(sheet.record ?? { name: '', type: 'cash', currency: prefs.currency, openingBalance: 0, color: '#14b8a6', icon: 'wallet', isArchived: false })); }, [prefs.currency, reset, sheet.record]);
@@ -43,8 +45,8 @@ export function WalletSheet() {
           <label className="field"><span>Tiền tệ</span><input type="text" {...register('currency')} /></label>
           <label className="field"><span>Số dư ban đầu</span><input type="number" step="0.01" {...register('openingBalance')} /></label>
         </div>
-        <div className="field"><span>Màu sắc</span><div className="picker-grid">{COLOR_OPTIONS.map((c) => <motion.button key={c} type="button" className={`picker-swatch${color === c ? ' picker-swatch--selected' : ''}`} style={{ background: c }} onClick={() => setValue('color', c)} whileTap={{ scale: 0.85 }}>{color === c && <Check size={14} />}</motion.button>)}</div></div>
-        <div className="field"><span>Biểu tượng</span><div className="icon-picker-grid">{WALLET_ICON_OPTIONS.map((ic) => <motion.button key={ic} type="button" className={`icon-picker-item${icon === ic ? ' icon-picker-item--selected' : ''}`} onClick={() => setValue('icon', ic)} whileTap={{ scale: 0.9 }}><IconGlyph name={ic} />{ic}</motion.button>)}</div></div>
+        <div className="field"><span>Màu sắc</span><div className="picker-grid">{COLOR_OPTIONS.map((c) => <motion.button key={c} type="button" className={`picker-swatch${color === c ? ' picker-swatch--selected' : ''}`} style={{ background: c }} onClick={() => setValue('color', c)} whileTap={reduceMotion ? undefined : { scale: 0.85 }}>{color === c && <Check size={14} />}</motion.button>)}</div></div>
+        <div className="field"><span>Biểu tượng</span><div className="icon-picker-grid">{WALLET_ICON_OPTIONS.map((ic) => <motion.button key={ic} type="button" className={`icon-picker-item${icon === ic ? ' icon-picker-item--selected' : ''}`} onClick={() => setValue('icon', ic)} whileTap={reduceMotion ? undefined : { scale: 0.9 }}><IconGlyph name={ic} />{ic}</motion.button>)}</div></div>
       </form>
     </Modal>
   );

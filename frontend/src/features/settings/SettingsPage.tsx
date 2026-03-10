@@ -10,10 +10,12 @@ import { archiveWallet, clearLocalData, exportSnapshot, importSnapshot } from '.
 import { snapshotSchema } from '../../domain/schemas';
 import { copyText, impact } from '../../lib/device';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 export function SettingsPage() {
   const data = useAppData();
+  const reduceMotion = shouldReduceMotion();
   const openWalletSheet = useUIStore((s) => s.openWalletSheet);
   const openCategorySheet = useUIStore((s) => s.openCategorySheet);
   const [exportJson, setExportJson] = useState('');
@@ -74,7 +76,7 @@ export function SettingsPage() {
       </header>
 
       {/* Display */}
-      <motion.section className="panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+      <motion.section className="panel" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.05 }}>
         <div className="panel__header"><div><p className="eyebrow">Hiển thị</p><h2>Cá nhân hóa</h2></div></div>
         <div className="field-grid">
           <label className="field"><span>Giao diện</span>
@@ -96,7 +98,7 @@ export function SettingsPage() {
       </motion.section>
 
       {/* Wallets */}
-      <motion.section className="panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <motion.section className="panel" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.1 }}>
         <div className="panel__header"><div><p className="eyebrow">Ví tiền</p><h2>Quản lý tài khoản</h2></div>
           <button type="button" className="soft-button" onClick={() => openWalletSheet()}><Plus size={13} /> Thêm ví</button>
         </div>
@@ -116,7 +118,7 @@ export function SettingsPage() {
       </motion.section>
 
       {/* Categories */}
-      <motion.section className="panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+      <motion.section className="panel" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.15 }}>
         <div className="panel__header"><div><p className="eyebrow">Danh mục</p><h2>Tùy chỉnh nhãn</h2></div>
           <button type="button" className="soft-button" onClick={() => openCategorySheet()}><Plus size={13} /> Thêm</button>
         </div>
@@ -135,7 +137,7 @@ export function SettingsPage() {
       </motion.section>
 
       {/* Import/Export */}
-      <motion.section className="panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <motion.section className="panel" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.2 }}>
         <div className="panel__header"><div><p className="eyebrow">Sao lưu</p><h2>Nhập/Xuất JSON</h2></div></div>
         <div className="inline-actions" style={{ flexWrap: 'wrap' }}>
           <button type="button" className="primary-button" onClick={() => void handleExport()}><Download size={14} /> Tạo bản sao lưu</button>
@@ -153,7 +155,7 @@ export function SettingsPage() {
       </motion.section>
 
       {/* Diagnostics */}
-      <motion.section className="panel panel--dense" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+      <motion.section className="panel panel--dense" initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={reduceMotion ? undefined : { opacity: 1, y: 0 }} transition={reduceMotion ? undefined : { delay: 0.25 }}>
         <div className="panel__header panel__header--compact"><h2>Chẩn đoán</h2></div>
         <div className="setting-row">
           <div><strong>Bản ghi IndexedDB</strong><span>{data.transactions.length} giao dịch · {data.wallets.length} ví · {data.categories.length} danh mục</span></div>

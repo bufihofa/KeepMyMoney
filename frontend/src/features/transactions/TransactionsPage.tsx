@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { toast } from 'sonner';
 import { Plus, Search, Copy, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -10,6 +9,7 @@ import { deleteTransaction } from '../../db/operations';
 import { buildCategoryLabelMap, buildWalletLabelMap, groupTransactionsByDay, sortTransactionsDescending, transactionMatchesSearch } from '../../domain/analytics';
 import { formatCurrency, formatRelativeDate } from '../../domain/format';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 const stagger = {
@@ -27,30 +27,25 @@ export function TransactionsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [listRef] = useAutoAnimate();
+  const reduceMotion = shouldReduceMotion();
 
   const catMap = useMemo(() => buildCategoryLabelMap(data.categories), [data.categories]);
   const walMap = useMemo(() => buildWalletLabelMap(data.wallets), [data.wallets]);
 
   const filtered = useMemo(() => {
+    const fromTimestamp = fromDate ? new Date(`${fromDate}T00:00:00`).getTime() : null;
+    const toTimestamp = toDate ? new Date(`${toDate}T23:59:59.999`).getTime() : null;
+
     return sortTransactionsDescending(data.transactions).filter((tx) => {
       if (tx.deletedAt) return false;
       if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
       if (walletFilter !== 'all' && tx.walletId !== walletFilter) return false;
       if (categoryFilter !== 'all' && tx.categoryId !== categoryFilter) return false;
       
-      if (fromDate || toDate) {
-        const txDate = new Date(tx.occurredAt);
-        if (fromDate) {
-          const start = new Date(fromDate);
-          start.setHours(0, 0, 0, 0);
-          if (txDate < start) return false;
-        }
-        if (toDate) {
-          const end = new Date(toDate);
-          end.setHours(23, 59, 59, 999);
-          if (txDate > end) return false;
-        }
+      if (fromTimestamp !== null || toTimestamp !== null) {
+        const txTimestamp = new Date(tx.occurredAt).getTime();
+        if (fromTimestamp !== null && txTimestamp < fromTimestamp) return false;
+        if (toTimestamp !== null && txTimestamp > toTimestamp) return false;
       }
 
       return transactionMatchesSearch(tx, search, walMap, catMap);
@@ -58,8 +53,16 @@ export function TransactionsPage() {
   }, [categoryFilter, catMap, data.transactions, search, typeFilter, walletFilter, walMap, fromDate, toDate]);
 
   const grouped = useMemo(() => groupTransactionsByDay(filtered), [filtered]);
-  const income = filtered.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expense = filtered.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const totals = useMemo(() => {
+    return filtered.reduce(
+      (acc, tx) => {
+        if (tx.type === 'income') acc.income += tx.amount;
+        if (tx.type === 'expense') acc.expense += tx.amount;
+        return acc;
+      },
+      { income: 0, expense: 0 },
+    );
+  }, [filtered]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -114,13 +117,13 @@ export function TransactionsPage() {
         </div>
         <div className="summary-strip">
           <div><span>Kết quả</span><strong>{filtered.length}</strong></div>
-          <div><span>Thu nhập</span><strong>{formatCurrency(income, data.preferences.currency)}</strong></div>
-          <div><span>Chi tiêu</span><strong>{formatCurrency(expense, data.preferences.currency)}</strong></div>
+          <div><span>Thu nhập</span><strong>{formatCurrency(totals.income, data.preferences.currency)}</strong></div>
+          <div><span>Chi tiêu</span><strong>{formatCurrency(totals.expense, data.preferences.currency)}</strong></div>
         </div>
       </section>
 
       {grouped.length > 0 ? (
-        <div className="stack-list" ref={listRef}>
+        <div className="stack-list">
           {grouped.map((g) => (
             <section key={g.date} className="panel panel--dense">
               <div className="panel__header panel__header--compact"><h2>{formatRelativeDate(g.date)}</h2></div>
@@ -130,22 +133,41 @@ export function TransactionsPage() {
                   const wal = walMap.get(tx.walletId);
                   const tone = tx.type === 'income' ? 'positive' : tx.type === 'expense' ? 'negative' : 'neutral';
                   return (
-                    <motion.article key={tx.id} className="transaction-row transaction-row--card" custom={i} initial="hidden" animate="show" variants={stagger}>
-                      <button type="button" className="transaction-row__main" onClick={() => openTransactionSheet(tx)}>
-                        <div className="transaction-row__icon" style={{ background: cat?.color ?? '#0d9488' }}>
-                          <IconGlyph name={cat?.icon ?? (tx.type === 'transfer' ? 'transfer' : 'wallet')} size="sm" />
+                    reduceMotion ? (
+                      <article key={tx.id} className="transaction-row transaction-row--card">
+                        <button type="button" className="transaction-row__main" onClick={() => openTransactionSheet(tx)}>
+                          <div className="transaction-row__icon" style={{ background: cat?.color ?? '#0d9488' }}>
+                            <IconGlyph name={cat?.icon ?? (tx.type === 'transfer' ? 'transfer' : 'wallet')} size="sm" />
+                          </div>
+                          <div className="transaction-row__content">
+                            <strong>{cat?.name ?? (tx.type === 'transfer' ? 'Chuyển khoản' : 'Giao dịch')}</strong>
+                            <span>{wal?.name ?? 'Ví'}{tx.note ? ` · ${tx.note}` : ''}</span>
+                          </div>
+                          <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
+                        </button>
+                        <div className="inline-actions">
+                          <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
+                          <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
                         </div>
-                        <div className="transaction-row__content">
-                          <strong>{cat?.name ?? (tx.type === 'transfer' ? 'Chuyển khoản' : 'Giao dịch')}</strong>
-                          <span>{wal?.name ?? 'Ví'}{tx.note ? ` · ${tx.note}` : ''}</span>
+                      </article>
+                    ) : (
+                      <motion.article key={tx.id} className="transaction-row transaction-row--card" custom={i} initial="hidden" animate="show" variants={stagger}>
+                        <button type="button" className="transaction-row__main" onClick={() => openTransactionSheet(tx)}>
+                          <div className="transaction-row__icon" style={{ background: cat?.color ?? '#0d9488' }}>
+                            <IconGlyph name={cat?.icon ?? (tx.type === 'transfer' ? 'transfer' : 'wallet')} size="sm" />
+                          </div>
+                          <div className="transaction-row__content">
+                            <strong>{cat?.name ?? (tx.type === 'transfer' ? 'Chuyển khoản' : 'Giao dịch')}</strong>
+                            <span>{wal?.name ?? 'Ví'}{tx.note ? ` · ${tx.note}` : ''}</span>
+                          </div>
+                          <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
+                        </button>
+                        <div className="inline-actions">
+                          <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
+                          <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
                         </div>
-                        <strong className={`amount amount--${tone}`}>{formatCurrency(tx.amount, data.preferences.currency)}</strong>
-                      </button>
-                      <div className="inline-actions">
-                        <button type="button" className="icon-button icon-button--ghost" onClick={() => openTransactionSheet({ ...tx, id: '' } as typeof tx)} aria-label="Nhân bản"><Copy size={14} /></button>
-                        <button type="button" className="icon-button icon-button--ghost" onClick={() => setDeleteTarget(tx.id)} aria-label="Xóa"><Trash2 size={14} /></button>
-                      </div>
-                    </motion.article>
+                      </motion.article>
+                    )
                   );
                 })}
               </div>

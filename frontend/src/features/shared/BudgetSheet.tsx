@@ -10,6 +10,7 @@ import { upsertBudget } from '../../db/operations';
 import { formatCurrency, toMonthKey } from '../../domain/format';
 import { budgetSchema, type BudgetFormValues } from '../../domain/schemas';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 function buildDefaults(r?: { categoryId: string; periodKey: string; limitAmount: number }): BudgetFormValues {
@@ -20,6 +21,7 @@ export function BudgetSheet() {
   const sheet = useUIStore((s) => s.budgetSheet);
   const close = useUIStore((s) => s.closeBudgetSheet);
   const data = useAppData();
+  const reduceMotion = shouldReduceMotion();
   const cats = data.categories.filter((c) => !c.isHidden && c.kind === 'expense');
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<BudgetFormValues>({ resolver: zodResolver(budgetSchema), defaultValues: buildDefaults() });
 
@@ -40,7 +42,7 @@ export function BudgetSheet() {
       <form id="budget-form" className="sheet-form" onSubmit={onSubmit}>
         {limit > 0 && <div className="amount-display"><div className="amount-display__value">{formatCurrency(limit, data.preferences.currency)}</div><div className="amount-display__currency">Hạn mức hàng tháng</div></div>}
         <div className="field"><span>Danh mục chi tiêu</span>
-          <div className="category-grid">{cats.map((c) => <motion.button key={c.id} type="button" className={`category-grid-item${catId === c.id ? ' category-grid-item--selected' : ''}`} onClick={() => setValue('categoryId', c.id, { shouldValidate: true })} whileTap={{ scale: 0.93 }}>
+          <div className="category-grid">{cats.map((c) => <motion.button key={c.id} type="button" className={`category-grid-item${catId === c.id ? ' category-grid-item--selected' : ''}`} onClick={() => setValue('categoryId', c.id, { shouldValidate: true })} whileTap={reduceMotion ? undefined : { scale: 0.93 }}>
             <div className="category-grid-item__icon" style={{ background: c.color }}><IconGlyph name={c.icon} size="sm" /></div>{c.name}
           </motion.button>)}</div>{errors.categoryId && <small style={{ color: 'var(--danger)' }}>{errors.categoryId.message}</small>}
         </div>

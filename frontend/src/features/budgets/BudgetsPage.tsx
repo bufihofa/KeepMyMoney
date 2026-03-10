@@ -1,11 +1,12 @@
-﻿import { motion } from 'framer-motion';
+﻿import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { Plus, Pencil } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { formatCurrency, toMonthKey } from '../../domain/format';
 import { buildBudgetProgress } from '../../domain/analytics';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 const stagger = {
@@ -16,12 +17,12 @@ const stagger = {
 export function BudgetsPage() {
   const data = useAppData();
   const openBudgetSheet = useUIStore((s) => s.openBudgetSheet);
+  const reduceMotion = shouldReduceMotion();
   const monthKey = toMonthKey();
-  const progress = buildBudgetProgress(data.budgets, data.transactions, data.categories, monthKey);
-  const totalBudget = progress.reduce((s, i) => s + i.budget.limitAmount, 0);
-  const totalSpent = progress.reduce((s, i) => s + i.spent, 0);
+  const progress = useMemo(() => buildBudgetProgress(data.budgets, data.transactions, data.categories, monthKey), [data.budgets, data.transactions, data.categories, monthKey]);
+  const totalBudget = useMemo(() => progress.reduce((s, i) => s + i.budget.limitAmount, 0), [progress]);
+  const totalSpent = useMemo(() => progress.reduce((s, i) => s + i.spent, 0), [progress]);
   const usage = totalBudget > 0 ? totalSpent / totalBudget : 0;
-  const [listRef] = useAutoAnimate();
   const statusLabel: Record<string, string> = { safe: 'An toàn', watch: 'Cẩn thận', danger: 'Nguy hiểm', over: 'Vượt ngưỡng' };
 
   return (
@@ -41,7 +42,7 @@ export function BudgetsPage() {
         <div className="hero-card__heading">
           <div>
             <p className="eyebrow">Tháng {monthKey}</p>
-            <h2>Đã dùng <CountUp end={Math.round(usage * 100)} duration={0.8} preserveValue />% ngân sách</h2>
+            <h2>Đã dùng <CountUp end={Math.round(usage * 100)} duration={reduceMotion ? 0 : 0.8} preserveValue />% ngân sách</h2>
           </div>
           <span className={`status-pill status-pill--${usage >= 1 ? 'over' : usage >= 0.9 ? 'danger' : usage >= 0.7 ? 'watch' : 'safe'}`}>
             {usage >= 1 ? 'Vượt' : usage >= 0.9 ? 'Nguy hiểm' : usage >= 0.7 ? 'Cẩn thận' : 'An toàn'}
@@ -51,16 +52,16 @@ export function BudgetsPage() {
           <span style={{ width: `${Math.min(usage, 1) * 100}%`, background: usage >= 0.9 ? '#ef4444' : usage >= 0.7 ? '#f59e0b' : '#10b981' }} />
         </div>
         <div className="metric-grid">
-          <article className="metric-card"><span>Tổng ngân sách</span><strong><CountUp end={totalBudget} separator="." duration={0.8} preserveValue /></strong></article>
-          <article className="metric-card metric-card--negative"><span>Đã chi</span><strong><CountUp end={totalSpent} separator="." duration={0.8} preserveValue /></strong></article>
-          <article className="metric-card metric-card--positive"><span>Còn lại</span><strong><CountUp end={totalBudget - totalSpent} separator="." duration={0.8} preserveValue /></strong></article>
+          <article className="metric-card"><span>Tổng ngân sách</span><strong><CountUp end={totalBudget} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong></article>
+          <article className="metric-card metric-card--negative"><span>Đã chi</span><strong><CountUp end={totalSpent} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong></article>
+          <article className="metric-card metric-card--positive"><span>Còn lại</span><strong><CountUp end={totalBudget - totalSpent} separator="." duration={reduceMotion ? 0 : 0.8} preserveValue /></strong></article>
         </div>
       </section>
 
       {progress.length > 0 ? (
-        <div className="stack-list" ref={listRef}>
+        <div className="stack-list">
           {progress.map((item, i) => (
-            <motion.article key={item.budget.id} className="panel budget-panel" custom={i} initial="hidden" animate="show" variants={stagger}>
+            <motion.article key={item.budget.id} className="panel budget-panel" custom={i} initial={reduceMotion ? false : 'hidden'} animate={reduceMotion ? undefined : 'show'} variants={reduceMotion ? undefined : stagger}>
               <div className="panel__header">
                 <div><p className="eyebrow">{monthKey}</p><h2>{item.category?.name ?? 'Ngân sách'}</h2></div>
                 <button type="button" className="soft-button" onClick={() => openBudgetSheet(item.budget)}><Pencil size={13} /> Sửa</button>

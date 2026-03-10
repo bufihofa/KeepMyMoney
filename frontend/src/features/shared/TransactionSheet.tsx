@@ -1,5 +1,5 @@
 ﻿import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { formatCurrency, fromDateTimeLocalValue, toDateTimeLocalValue } from '..
 import type { TransactionRecord } from '../../domain/models';
 import { transactionSchema, type TransactionFormValues } from '../../domain/schemas';
 import { useAppData } from '../../hooks/useAppData';
+import { shouldReduceMotion } from '../../lib/performance';
 import { useUIStore } from '../../stores/uiStore';
 
 function buildDefaults(record?: TransactionRecord, tagNames = ''): TransactionFormValues {
@@ -21,6 +22,7 @@ export function TransactionSheet() {
   const sheet = useUIStore((s) => s.transactionSheet);
   const close = useUIStore((s) => s.closeTransactionSheet);
   const data = useAppData();
+  const reduceMotion = shouldReduceMotion();
   const wallets = data.wallets.filter((w) => !w.isArchived);
   const tagsMap = new Map(data.tags.map((t) => [t.id, t.name]));
   const tagNames = sheet.record?.tagIds.map((id) => tagsMap.get(id)).filter(Boolean).join(', ') ?? '';
@@ -30,9 +32,10 @@ export function TransactionSheet() {
 
   const txType = watch('type');
   const walletId = watch('walletId');
+  const toWalletId = watch('toWalletId');
   const categoryId = watch('categoryId');
   const amount = watch('amount');
-  const catOptions = data.categories.filter((c) => !c.isHidden && c.kind === (txType === 'income' ? 'income' : 'expense'));
+  const catOptions = useMemo(() => data.categories.filter((c) => !c.isHidden && c.kind === (txType === 'income' ? 'income' : 'expense')), [data.categories, txType]);
 
   const onSubmit = handleSubmit(async (v) => {
     await upsertTransaction({ id: sheet.record?.id || undefined, type: v.type, amount: v.amount, walletId: v.walletId, toWalletId: v.type === 'transfer' ? v.toWalletId : undefined, categoryId: v.type === 'transfer' ? undefined : v.categoryId, note: v.note, tagNames: v.tags.split(',').map((s) => s.trim()).filter(Boolean), occurredAt: fromDateTimeLocalValue(v.occurredAt) });
@@ -67,18 +70,17 @@ export function TransactionSheet() {
         {txType === 'transfer' ? (
           <div className="field"><span>Ví đích</span>
             <div className="wallet-picker">{wallets.filter((w) => w.id !== walletId).map((w) => {
-              const toId = watch('toWalletId');
-              return <button key={w.id} type="button" className={`wallet-picker-item${toId === w.id ? ' wallet-picker-item--selected' : ''}`} onClick={() => setValue('toWalletId', w.id, { shouldValidate: true })}>
+              return <button key={w.id} type="button" className={`wallet-picker-item${toWalletId === w.id ? ' wallet-picker-item--selected' : ''}`} onClick={() => setValue('toWalletId', w.id, { shouldValidate: true })}>
                 <div className="wallet-picker-item__icon" style={{ background: w.color }}><IconGlyph name={w.icon} size="sm" /></div>
                 <div className="wallet-picker-item__info"><strong>{w.name}</strong><span>{formatCurrency(w.currentBalanceCache, w.currency)}</span></div>
-                {toId === w.id && <Check size={16} style={{ color: 'var(--primary)' }} />}
+                {toWalletId === w.id && <Check size={16} style={{ color: 'var(--primary)' }} />}
               </button>;
             })}</div>{errors.toWalletId && <small style={{ color: 'var(--danger)' }}>{errors.toWalletId.message}</small>}
           </div>
         ) : (
           <div className="field"><span>Danh mục</span>
             <div className="category-grid">{catOptions.map((c) => (
-              <motion.button key={c.id} type="button" className={`category-grid-item${categoryId === c.id ? ' category-grid-item--selected' : ''}`} onClick={() => setValue('categoryId', c.id, { shouldValidate: true })} whileTap={{ scale: 0.93 }}>
+              <motion.button key={c.id} type="button" className={`category-grid-item${categoryId === c.id ? ' category-grid-item--selected' : ''}`} onClick={() => setValue('categoryId', c.id, { shouldValidate: true })} whileTap={reduceMotion ? undefined : { scale: 0.93 }}>
                 <div className="category-grid-item__icon" style={{ background: c.color }}><IconGlyph name={c.icon} size="sm" /></div>{c.name}
               </motion.button>
             ))}</div>{errors.categoryId && <small style={{ color: 'var(--danger)' }}>{errors.categoryId.message}</small>}
